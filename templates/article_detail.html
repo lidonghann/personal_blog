@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>李东韩博客</title>
+</head>
+
+<link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/static/css/common.css"/>
+<link rel="stylesheet" type="text/css" href="/static/css/article_detail.css"/>
+<link href="logo.ico" rel="shortcut icon"/>
+<script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!--<script type="text/javascript" src="plugin/jquery.page.js"></script>-->
+<script src="/static/js/common.js"></script>
+<!--<script src="js/snowy.js"></script>-->
+
+
+<body>
+	{% include "base.html" %}
+	<div class="w_container">
+		<div class="container">
+			<div  class="row w_main_row">
+                <div id="passage">
+            </div>
+                {% include 'publish_base.html' %}
+
+			</div>
+            {% include 'comment.html' %}
+		</div>
+	</div>
+	<div class="w_foot">
+		<!--<div class="w_foot_copyright">© 2015~2016 版权所有 | <a target="_blank" href="http://www.miitbeian.gov.cn/" rel="nofollow">京ICP备15010892号-1</a></div>-->
+		<div class="w_foot_copyright">Copyright © 2017-2020, www.wfyvv.com. All Rights Reserved. </div>
+	</div>
+	<!--toTop-->
+	<div id="shape">
+		<div class="shapeColor">
+			<div class="shapeFly">
+			</div>
+		</div>
+	</div>
+	<!--snow-->
+	<!--<div class="snow-container"></div>-->
+<script>
+    var blog_name = "{{ blog_name }}"
+    $(document).ready(function () {
+        $.post('/whole_passage/?blog_name='+blog_name, {}, function (resp) {
+            resp = JSON.parse(resp)
+            var blog = '';
+            
+            if (resp['success']) {
+                blog = `<ol class="breadcrumb w_breadcrumb">
+				  <li><a href="/index/">首页</a></li>
+				  <li><a href="/all_article/">文章</a></li>
+				  <li class="active">我的个人博客之——`+ resp['data'][0]['blog_name']+`</li>
+				  <span class="w_navbar_tip">我们长路漫漫，只因学无止境。</span>
+				</ol>
+
+				<div class="col-lg-9 col-md-9 w_main_left">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<h2 class="c_titile">我的个人博客之——`+ resp['data'][0]['blog_name']+`</h2>
+							<p class="box_c"><span class="d_time">发布时间：`+ resp['data'][0]['blog_time']+`</span><span>编辑：<a href="mailto:wfyv@qq.com">`+ resp['data'][0]['author']+`</a></span><span>阅读（`+resp['data'][0]['reading_quantity'] +`）</span></p>
+							<ul class="infos">
+								      <p>`+resp['data'][0]['blog_context'] +`</p>
+							</ul>
+							<div class="keybq">
+						    	<p><span>关键字</span>：`+ get_a_tags(resp)+`</p>
+						    </div>
+
+
+
+							<div class="nextinfo">
+								<p class="last">上一篇：<a href="/whole_passage/?blog_name=`+last_blog(resp) +`">`+ last_blog(resp)+`</a></p>
+								<p class="next">下一篇：<a id="next_blog" href="/whole_passage/?blog_name=`+next_blog(resp) +`">`+ next_blog(resp)+`</a></p>
+						    </div>
+
+						</div>
+					</div>
+
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<center><div id="cyReward" role="cylabs" data-use="reward" sid="5eab7e4c363e4cb8bed0efa3604e6b42"></div></center>
+							<!--<div id="cyEmoji" role="cylabs" data-use="emoji" sid="5eab7e4c363e4cb8bed0efa3604e6b42"></div>-->
+						</div>
+					</div>
+				</div>`
+                $('#passage').html(blog)
+                $('[href="/whole_passage/?blog_name=没有了"]').removeAttr("href")
+            }
+        })
+    })
+    function get_a_tags(resp) {
+        var str1 = '';
+        for (var j = 0; j < resp['data'][0]['blog_label'].length; j++) {
+            str1 += '<a class="label label-default">' + resp['data'][0]['blog_label'][j] + '</a>';
+        }
+        return str1
+    }
+    function next_blog(resp) {
+        var j =10;
+        for(var i=0; i<resp['all_data'].length; i++){
+            if (resp['all_data'][i]['blog_name'] == blog_name){
+                j = i
+            }
+            if(j==resp['all_data'].length-1){
+                return '没有了'
+            }
+        }
+        return resp['all_data'][j+1]['blog_name']
+    }
+    function last_blog(resp) {
+        var j =10;
+        for(var i=0; i<resp['all_data'].length; i++){
+            if (resp['all_data'][i]['blog_name'] == blog_name){
+                j = i
+            }
+            if(j==0){
+                return '没有了'
+            }
+        }
+        return resp['all_data'][j-1]['blog_name']
+    }
+
+</script>
+</body>
+</html>

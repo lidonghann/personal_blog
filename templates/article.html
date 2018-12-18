@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>李东韩博客</title>
+</head>
+{% load static %}
+<link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/static/css/common.css"/>
+<link rel="stylesheet" type="text/css" href="/static/css/article.css"/>
+{#<link href="/static/css/pagination.css" rel="stylesheet" type="text/css" />#}
+{#<script src="/static/js/jquery.min.js"></script>#}
+<link href="logo.ico" rel="shortcut icon"/>
+<script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+<script src="/static/js/jquery.pagination.js"></script>
+{#<script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>#}
+
+
+<!--<script src="js/snowy.js"></script>-->
+{#<script type="text/javascript">#}
+{#	#}
+{#$(function(){#}
+{#	$("#page").Page({#}
+{#	  totalPages: 7,//分页总数#}
+{#	  liNums: 5,//分页的数字按钮数(建议取奇数)#}
+{#	  activeClass: 'activP', //active 类样式定义#}
+{#	  callBack : function(page){#}
+{#			//console.log(page)#}
+{#	  }#}
+{#  });#}
+{#})#}
+{#</script>#}
+
+<body>
+	{% include "base.html" %}
+	<div class="w_container">
+		<div class="container">
+			<div class="row w_main_row">
+				
+				<ol class="breadcrumb w_breadcrumb">
+				  <li><a href="/index/">首页</a></li>
+				  <li class="active">文章</li>
+				  <span class="w_navbar_tip">我们长路漫漫，只因学无止境。</span>
+				</ol>
+				
+				<div class="col-lg-9 col-md-9 w_main_left">
+					<div class="panel panel-default">
+					  <div class="panel-body contentList">
+					  	<div id="article"></div>
+						<div id="page">
+							
+						</div>
+						
+						
+					  </div>
+					</div>
+					
+				</div>
+                {% include 'publish_base.html' %}
+			</div>
+		</div>
+	</div>
+	<div class="w_foot">
+		<!--<div class="w_foot_copyright">© 2015~2016 版权所有 | <a target="_blank" href="http://www.miitbeian.gov.cn/" rel="nofollow">京ICP备15010892号-1</a></div>-->
+		<div class="w_foot_copyright">Copyright © 2017-2020, www.wfyvv.com. All Rights Reserved. </div>
+	</div>
+	<!--toTop-->
+	<div id="shape">
+		<div class="shapeColor">
+			<div class="shapeFly">
+			</div>
+		</div>
+	</div>
+	<!--snow-->
+	<!--<div class="snow-container"></div>-->
+</body>
+<script>
+    $(document).ready(function () {
+        $.post('/all_article/', {},
+            function (resp) {
+                resp = JSON.parse(resp)
+                if (resp['success']) {
+                    var blog = '';
+                    for (var i = 0; i < resp['data'].length; i++) {
+                        blog += `<div class="panel panel-default">
+                                <div class="panel-body">
+                                    <div class="contentleft">
+                                        <h4><a class="title" href="/whole_passage/?blog_name=` + resp['data'][i]['blog_name'] + `">` + resp['data'][i]['blog_name'] + `</a></h4>
+                                        <p>
+                                            ` + get_a_tags(resp, i) + `
+                                        </p>
+                                        <p class="overView" style="display: -webkit-box;   overflow: hidden;   white-space: normal!important;   text-overflow: ellipsis;   word-wrap: break-word;   -webkit-line-clamp: 3;   -webkit-box-orient: vertical;">` + resp['data'][i]['blog_context'] + `
+                                            </p>
+                                        <p><span class="count"><i class="glyphicon glyphicon-user"></i><a
+                                                href="#">` + resp['data'][i]['author'] + `</a></span> <span class="count"><i
+                                                class="glyphicon glyphicon-eye-open"></i>阅读:` + resp['data'][i]['reading_quantity'] + `</span><span
+                                                class="count"><i
+                                                class="glyphicon glyphicon-comment"></i><a href="/whole_passage/?blog_name=`+resp['data'][i]['blog_name'] +`">评论:` + resp['data'][i]['comment_quantity'] + `</span></a><span class="count"><i
+                                                class="glyphicon glyphicon-time"></i>` + resp['data'][i]['blog_time'] + `</span></p>
+                                    </div>
+                                    <div class="contentImage">
+                                        <div class="row">
+                                            ` + remove_img(resp, i) + `
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                    }
+                    $('#article').html(blog);
+                }
+            })
+    });
+    function get_a_tags(resp, i) {
+        var str1 = '';
+        for (var j = 0; j < resp['data'][i]['blog_label'].length; j++) {
+            str1 += '<a class="label label-default">' + resp['data'][i]['blog_label'][j] + '</a>';
+        }
+        return str1
+    }
+    function remove_img(resp, i) {
+        if (resp['data'][i]['image'] != "") {
+            str_img = '<a href="#" class="thumbnail w_thumbnail"><img id="pic" src="/media/' + resp['data'][i]['image'] + '" alt="..."></a>'
+            return str_img
+        }
+        else {
+            return ""
+        }
+    }
+</script>
+</html>
