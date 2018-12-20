@@ -138,8 +138,13 @@ def whole_passage(request):
 @csrf_exempt
 def all_article(request):
     resp = {'success': 0, 'error': '', 'data': [], 'page_need': {}}
+    page = int(request.GET.get('page', 3))
     if request.method == 'POST':
-        all_blog = Blog.objects.order_by('-blog_time')
+        print page
+        print 111111
+        start = page*2-2
+        end = page*2
+        all_blog = Blog.objects.order_by('-blog_time')[start:end]
         resp['success'] = 1
         resp['page_need']['pageCount'] = len(all_blog)/2
         resp['page_need']['totalData'] = len(all_blog)
@@ -159,5 +164,9 @@ def all_article(request):
         request.session['data'] = resp['data']
         return HttpResponse(json.dumps(resp))
     else:
-        return render(request, 'article.html')
+        start = page * 2 - 2
+        end = page * 2
+        all_blog = Blog.objects.order_by('-blog_time')[start:end]
+        page_count = len(all_blog) / 2
+        return render(request, 'article.html', {'page_count': page_count})
 

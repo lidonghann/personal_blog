@@ -58,6 +58,7 @@
 				</div>
                 {% include 'publish_base.html' %}
 			</div>
+            <div id="page_"></div>
 		</div>
 	</div>
 	<div class="w_foot">
@@ -75,16 +76,24 @@
 	<!--<div class="snow-container"></div>-->
 </body>
 <script>
+    var page_count = {{ page_count }}
     $(document).ready(function () {
         $.post('/all_article/', {},
             function (resp) {
                 resp = JSON.parse(resp)
                 if (resp['success']) {
+                    var page_href = ''
+                    console.log(11111111)
+                    console.log(page_count)
+                    for (var j = 1; j < 4; j++){
+                        page_href += `<a href="/all_article/?page=`+j +`">`+j +`</a>`
+                    }
+                    $("#page_").html(page_href)
                     var blog = '';
                     for (var i = 0; i < resp['data'].length; i++) {
                         blog += `<div class="panel panel-default">
-                                <div class="panel-body">
-                                    <div class="contentleft">
+                                <div class="panel-body" >
+                                    <div class="contentleft" >
                                         <h4><a class="title" href="/whole_passage/?blog_name=` + resp['data'][i]['blog_name'] + `">` + resp['data'][i]['blog_name'] + `</a></h4>
                                         <p>
                                             ` + get_a_tags(resp, i) + `
