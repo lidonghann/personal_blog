@@ -12,8 +12,11 @@
 {#<script src="/static/js/jquery.min.js"></script>#}
 <link href="logo.ico" rel="shortcut icon"/>
 <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
-<script src="/static/js/jquery.pagination.js"></script>
+{#<script src="/static/js/jquery.pagination.js"></script>#}
 {#<script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>#}
+<link href="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.js"></script>
+<script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.min.js"></script>
 
 
 <!--<script src="js/snowy.js"></script>-->
@@ -46,10 +49,15 @@
 				<div class="col-lg-9 col-md-9 w_main_left">
 					<div class="panel panel-default">
 					  <div class="panel-body contentList">
-					  	<div id="article"></div>
-						<div id="page">
-							
-						</div>
+{#					  	<div id="article"></div>#}
+{#                       <div id="pagination"></div>#}
+{#						<div id="page">#}
+{#							#}
+{#						</div>#}
+
+                          <div id="dataContainer" style="border:1px solid;border-bottom-color:black;"></div>
+
+                        <div id="demo"></div>
 						
 						
 					  </div>
@@ -76,51 +84,83 @@
 </body>
 <script>
     $(document).ready(function () {
-        $.post('/all_article/', {},
-            function (resp) {
-                resp = JSON.parse(resp)
-                if (resp['success']) {
-                    var blog = '';
-                    for (var i = 0; i < resp['data'].length; i++) {
-                        blog += `<div class="panel panel-default">
+        load_data(0);
+    });
+
+function load_data(type) {
+        $('#demo').pagination({
+            dataSource: '/all_article/',//接口 参数
+            prevText: '上一页',
+            nextText: '下一页',
+            className: 'paginationjs-theme-red',
+            alias: {
+                pageNumber: 'page',
+                pageSize: 'size'
+            },
+            pageSize: 5,
+            showGoInput: true,
+            showGoButton: true,
+            locator: 'a.data',
+            totalNumberLocator: function (response) {//处理页数
+                return response.total;
+            },
+            ajax: {
+                type: 'POST',
+                beforeSend: function () {//请求前处理
+                    $("#dataContainer").html('加载中...');
+                }
+            },
+            callback: function (data, pagination) {//请求后处理
+                var html = "";
+                for(var i=0;i<=data.length;i++){
+                    if(data[i] != undefined){
+                        html += load_html(data[i]);
+                    }
+
+                }
+                $("#dataContainer").html(html);
+            }
+        })
+    }
+    function load_html(item) {
+{#        return "<div><span>" + item["blog_time"] + "</span>---<span>" + item["blog_name"] + "</span>---<span>" + item["author"] + "</span></div>";#}
+        return `<div class="panel panel-default">
                                 <div class="panel-body">
                                     <div class="contentleft">
-                                        <h4><a class="title" href="/whole_passage/?blog_name=` + resp['data'][i]['blog_name'] + `">` + resp['data'][i]['blog_name'] + `</a></h4>
+                                        <h4><a class="title" href="/whole_passage/?blog_name=` + item["blog_name"] + `">` + item["blog_name"] + `</a></h4>
                                         <p>
-                                            ` + get_a_tags(resp, i) + `
+                                            ` + get_a_tags(item) + `
                                         </p>
-                                        <p class="overView" style="display: -webkit-box;   overflow: hidden;   white-space: normal!important;   text-overflow: ellipsis;   word-wrap: break-word;   -webkit-line-clamp: 3;   -webkit-box-orient: vertical;">` + resp['data'][i]['blog_context'] + `
+                                        <p class="overView" style="display: -webkit-box;   overflow: hidden;   white-space: normal!important;   text-overflow: ellipsis;   word-wrap: break-word;   -webkit-line-clamp: 3;   -webkit-box-orient: vertical;">` + item['blog_context'] + `
                                             </p>
                                         <p><span class="count"><i class="glyphicon glyphicon-user"></i><a
-                                                href="#">` + resp['data'][i]['author'] + `</a></span> <span class="count"><i
-                                                class="glyphicon glyphicon-eye-open"></i>阅读:` + resp['data'][i]['reading_quantity'] + `</span><span
+                                                href="#">` + item['author'] + `</a></span> <span class="count"><i
+                                                class="glyphicon glyphicon-eye-open"></i>阅读:` + item['reading_quantity'] + `</span><span
                                                 class="count"><i
-                                                class="glyphicon glyphicon-comment"></i><a href="/whole_passage/?blog_name=`+resp['data'][i]['blog_name'] +`">评论:` + resp['data'][i]['comment_quantity'] + `</span></a><span class="count"><i
-                                                class="glyphicon glyphicon-time"></i>` + resp['data'][i]['blog_time'] + `</span></p>
+                                                class="glyphicon glyphicon-comment"></i><a href="/whole_passage/?blog_name=`+item['blog_name'] +`">评论:` + item['comment_quantity'] + `</span></a><span class="count"><i
+                                                class="glyphicon glyphicon-time"></i>` + item['blog_time'] + `</span></p>
                                     </div>
                                     <div class="contentImage">
                                         <div class="row">
-                                            ` + remove_img(resp, i) + `
+                                            ` + remove_img(item) + `
 
                                         </div>
                                     </div>
                                 </div>
                             </div>`;
-                    }
-                    $('#article').html(blog);
-                }
-            })
-    });
-    function get_a_tags(resp, i) {
+    }
+
+
+    function get_a_tags(item) {
         var str1 = '';
-        for (var j = 0; j < resp['data'][i]['blog_label'].length; j++) {
-            str1 += '<a class="label label-default">' + resp['data'][i]['blog_label'][j] + '</a>';
+        for (var j = 0; j < item['blog_label'].length; j++) {
+            str1 += '<a class="label label-default">' + item['blog_label'][j] + '</a>';
         }
         return str1
     }
-    function remove_img(resp, i) {
-        if (resp['data'][i]['image'] != "") {
-            str_img = '<a href="#" class="thumbnail w_thumbnail"><img id="pic" src="/media/' + resp['data'][i]['image'] + '" alt="..."></a>'
+    function remove_img(item) {
+        if (item['image'] != "") {
+            str_img = '<a href="#" class="thumbnail w_thumbnail"><img id="pic" src="/media/' + item['image'] + '" alt="..."></a>'
             return str_img
         }
         else {

@@ -1,7 +1,6 @@
 (function($){
 	function crateCommentInfo(obj){
-		/*
-		 * <div class="comment-info">
+		a =` <div class="comment-info">
 			<header><img src="./images/img.jpg"></header>
 			<div class="comment-right">
 				<h3>匿名</h3>
@@ -25,8 +24,7 @@
 					</div>
 				</div>
 			</div>
-		</div>
-		 * */
+		</div>`
 		
 		if(typeof(obj.time) == "undefined" || obj.time == ""){
 			obj.time = getNowDateFormat();

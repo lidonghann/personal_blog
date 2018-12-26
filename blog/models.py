@@ -29,10 +29,22 @@ class Blog(models.Model):
 
 
 class Comment(models.Model):
+    father = models.ForeignKey('self', models.SET_NULL, verbose_name='父', null=True)
     comment_author = models.ForeignKey(User)
-    comment_content = models.CharField(max_length=200)
+    comment_content = models.TextField(max_length=200)
     comment_time = models.DateTimeField(auto_now=True)
     blog = models.ForeignKey(Blog)
 
     def __unicode__(self):
-        return self.comment_author
+        return self.comment_content
+
+
+# class ChildrenComment(models.Model):
+#     reply_id = models.ForeignKey(Comment)
+#     comment_author = models.ForeignKey(User)
+#     comment_content = models.TextField(max_length=200)
+#     comment_time = models.DateTimeField(auto_now=True)
+#     blog = models.ForeignKey(Blog)
+#
+#     def __unicode__(self):
+#         return self.comment_content

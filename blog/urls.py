@@ -26,4 +26,6 @@ urlpatterns = [
     url(r'^about/', views.about),
     url(r'^whole_passage/', views.whole_passage),
     url(r'^all_article/', views.all_article),
+    url(r'^comment/', views.comment),
+    url(r'^children_comment/', views.comment),
 ]
