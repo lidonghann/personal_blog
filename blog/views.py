@@ -110,25 +110,27 @@ def about(request):
     return render(request, 'about.html')
 
 
-# def get_com_dict(comment):
-#     comment_att = {}
-#     comment_att['father'] = comment.father_id
-#     comment_att['comment_id'] = comment.id
-#     comment_att['comment_content'] = comment.comment_content
-#     comment_att['comment_author'] = comment.comment_author.username
-#     comment_att['comment_time'] = str(comment.comment_time).split('+')[0]
-#     return comment_att
-#
-# def get_comment_tree(blog_name):
-#     id2info = {}
-#     childid2fatherid ={}
-#     for comment in Comment.objects.filter(blog__blog_name=blog_name,status=0):
-#         comment_att = get_com_dict(comment)
-#         childid2fatherid[comment.id] = comment.father_id
-#         id2info[comment.id] = comment_att
-#     return id2info, childid2fatherid
+def get_com_dict(comment):
+    comment_att = {}
+    comment_att['father'] = comment.father_id
+    comment_att['father_name'] = comment.father.comment_author.username if comment.father else ''
+    comment_att['comment_id'] = comment.id
+    comment_att['comment_content'] = comment.comment_content
+    comment_att['comment_author'] = comment.comment_author.username
+    comment_att['comment_time'] = str(comment.comment_time).split('+')[0]
+    return comment_att
 
 
+def get_comments(blog_name=''):
+    result = []
+    for comment in Comment.objects.filter(blog__blog_name=blog_name, father__isnull=True):
+        print comment,22222222
+        father_dict = get_com_dict(comment)
+        father_dict['children'] = []
+        for child_com in Comment.objects.filter(ancestor=comment).order_by('comment_time'):
+            father_dict['children'].append(get_com_dict(child_com))
+        result.append(father_dict)
+    return result
 
 
 @csrf_exempt
@@ -139,20 +141,8 @@ def whole_passage(request):
     # blog_exist = get_object_or_404(Blog, pk=blog_name)
     if request.method == 'POST':
         resp['success'] = 1
-        comments = Comment.objects.filter(blog__blog_name=blog_name).all()
-        # print comment.comment_content
-        # id2info, childid2fatherid = get_comment_tree(blog_name)
-        # resp['id2info'] = id2info
-        # resp['childid2fatherid'] = childid2fatherid
-        for comment in comments:
-            comment_att = {}
-            comment_att['father'] = comment.father_id
-            print comment.father_id
-            comment_att['comment_id'] = comment.id
-            comment_att['comment_content'] = comment.comment_content
-            comment_att['comment_author'] = comment.comment_author.username
-            comment_att['comment_time'] = str(comment.comment_time).split('+')[0]
-            resp['comments'].append(comment_att)
+        resp['comments'] = get_comments(blog_name)
+        print json.dumps(resp['comments'])
         blog = Blog.objects.filter(blog_name=blog_name).first()
         blog_att = {}
         blog_att['top'] = blog.top
@@ -204,29 +194,20 @@ def comment(request):
     if request.method == 'POST':
         comment_content = request.POST.get('comment_content')
         comment_author = request.session.get('username', '')
-        father_comment_id = request.POST.get('comment_id', '')
-        print father_comment_id
+        father_comment_id = request.POST.get('father_comment_id', '')
         if comment_author:
             username = User.objects.filter(username=comment_author).first()
             blog_name = request.POST.get('blog_name')
             blog = Blog.objects.filter(blog_name=blog_name).first()
-            print comment_content
+
             com = Comment(comment_author=username, comment_content=str(comment_content), blog=blog)
-            if father_comment_id:
+            if father_comment_id:# 回复评论
                 father = Comment.objects.filter(id=father_comment_id).first()
-                father.status = 1
-                father.save()
                 com.father = father
+                com.ancestor = father.ancestor if father.ancestor else father
             com.save()
             resp['success'] = 1
         else:
             resp['error'] = '请先登录后再评论'
         return HttpResponse(json.dumps(resp))
 
-
-@csrf_exempt
-def children_comment(request):
-    resp = {'success': 0, 'error': '', 'data': []}
-    if request.method == 'POST':
-        pass
-        return HttpResponse(resp)

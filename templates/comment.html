@@ -109,48 +109,13 @@
 
 
 <script type="text/javascript">
-    $('#reply-ceshi').click(function () {
-        $('#reply_com').html("<div class='replybox'><textarea cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send'>发送</span></div>")
-    })
-    var child_comment = '';
+{#        $('#reply-ceshi').click(function () {#}
+{#             $('#reply_com').html("<div class='replybox'><textarea cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send'>发送</span></div>")#}
+{#        });#}
+
+
     $(function () {
-        com()
-        function com() {
-            $.post('/whole_passage/?blog_name=' + blog_name, {}, function (resp) {
-                resp = JSON.parse(resp);
-                var comment_text = '';
-                if (resp['success']) {
-                    for (var k = 0; k < resp['comments'].length; k++) {
-                        if (!resp['comments'][k]['father']) {
-                            comment_text += `<div class="comment-info">
-			<header><img src="./images/img.jpg"></header>
-			<div class="comment-right">
-				<h3>` + resp['comments'][k]['comment_author'] + `</h3>
-				<div class="comment-content-header"><span><i class="glyphicon glyphicon-time"></i> ` + resp['comments'][k]['comment_time'] + `</span></div>
-				<p class="content">` + resp['comments'][k]['comment_content'] + `</p>
-				<div class="comment-content-footer">
-					<div class="row">
-						<div class="col-md-10">
-						</div>
-						<div class="col-md-2"><span class="reply-btn" id="reply-ceshi` + k + `" onclick="ch_comment(this, ` + k + `,` + resp['comments'][k]['comment_id'] + `)">回复</span></div>
-						<div id="reply_com` + k + `"></div>
-					</div>
-				</div>
-				<div class="reply-list">
-					<div class="reply" id ="reply` + k + `" onload="tt(this,`+resp+`, `+k+`)">
-                        <button id="333" onclick="tt(this, `+ resp+`, `+k+`)">ggg</button>
-
-					</div>
-				</div>
-			</div>
-		</div>`
-                        }
-                    }
-                    $('#comment-list').html(comment_text);
-                }
-            })
-        }
-
+        com();
         $('#comment').click(function () {
             $.post('/comment/', {
                 'comment_content': $('#content').val(),
@@ -158,50 +123,79 @@
             }, function (resp) {
                 resp = JSON.parse(resp)
                 if (resp['success']) {
-                    com()
+                    com();
                 } else {
-                    alert(resp['error'])
+                    alert(resp['error']);
                     window.location.href = '/login/'
                 }
             })
-        })
-    })
-    function ch_comment(e, i, comment_id) {
-        html_str = ''
-        html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
+        });
+
+    });
+
+
+function com(){
+            $.post('/whole_passage/?blog_name=' + blog_name, {}, function (resp) {
+                resp = JSON.parse(resp);
+                var comment_text = '';
+                if (resp['success']) {
+                    for (var k = 0; k < resp['comments'].length; k++) {
+                        var child_text = '';
+                        comment_text += `<div class="comment-info">
+                                                <header><img src="./images/img.jpg"></header>
+                                                <div class="comment-right">
+                                                    <h3>` + resp['comments'][k]['comment_author'] + `</h3>
+                                                    <div class="comment-content-header"><span><i class="glyphicon glyphicon-time"></i> ` + resp['comments'][k]['comment_time'] + `</span></div>
+                                                    <p class="content">` + resp['comments'][k]['comment_content'] + `</p>
+                                                    <div class="comment-content-footer">
+                                                        <div class="row">
+                                                            <div class="col-md-10">
+                                                            </div>
+                                                            <div class="col-md-2"><span class="reply-btn" id="reply-ceshi` + k + `" onclick="ch_comment(this, ` + k + `,` + resp['comments'][k]['comment_id'] + `)">回复</span></div>
+                                                            <div id="reply_com` + k + `"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="reply-list">
+                                                        <div class="reply" id ="reply` + k + `>`;
+                        for (var m = 0; m < resp['comments'][k]['children'].length; m++) {
+                            child_text += `<div><a href="javascript:void(0)">` + resp['comments'][k]['children'][m]['comment_author'] + `</a>:<a href="javascript:void(0)">@` + resp['comments'][k]['children'][m]['father_name'] + `</a><span>` + resp['comments'][k]['children'][m]['comment_content'] + `</span></div>
+        <p><span>`+resp['comments'][k]['children'][m]['comment_time']+`</span> <span class="reply-list-btn" onclick="child_child_comment(this, ` + (k+100)*(m+25) + `,` + resp['comments'][k]['children'][m]['comment_id'] + `)">回复</span></p> <div id="reply_child` + (k+100)*(m+25) + `"></div>` ;
+                        }
+                        var end_text = `</div></div></div></div>`;
+                        comment_text += child_text + end_text;
+
+                    }
+                    $('#comment-list').html(comment_text);
+                }
+            })
+        }
+
+function ch_comment(e, i, comment_id) {
+        var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
         $('#reply_com' + i).html(html_str)
     }
-    function child_reply(e, i, comment_id) {
-        $.post('/children_comment/', {
-            'comment_content': $('#child_context' + i).val(),
-            'blog_name': blog_name,
-            'comment_id': comment_id
-        }, function (resp) {
-            resp = JSON.parse(resp)
-            if (resp['success']) {
-                com()
-            } else {
-                alert(resp['error'])
-                window.location.href = '/login/'
-            }
-        })
-
+function child_child_comment(e, i, comment_id) {
+        var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
+        $('#reply_child' + i).html(html_str)
     }
-    function tt(e, resp, i) {
-        resp = JSON.parse(resp);
-        for (var k = 0; k < resp['comments'].length; k++) {
-            if (resp['comments'][k]['father']) {
-                for (var q = 0; q < resp['comments'].length; q++) {
-                    if (resp['comments'][k]['father'] == resp['comments'][q]['comment_id']) {
-                        console.log(resp['comments'][k]['comment_content'])
-                        child_comment += `<div><a href="javascript:void(0)">` + resp['comments'][k]['comment_author'] + `</a>:<a href="javascript:void(0)">@匿名</a><span>` + resp['comments'][k]['comment_content'] + `</span></div>
-        <p><span>2017-10-17 11:42:53</span> <span class="reply-list-btn">回复</span></p>`
-                    }
+function child_reply(e, i, comment_id) {
+            $.post('/children_comment/', {
+                'comment_content': $('#child_context' + i).val(),
+                'blog_name': blog_name,
+                'father_comment_id': comment_id
+            }, function (resp) {
+                resp = JSON.parse(resp)
+                if (resp['success']) {
+                    com();
+                } else {
+                    alert(resp['error']);
+                    window.location.href = '/login/'
                 }
-            }
+            })
+
         }
-        $('#reply' + i).html(child_comment)
-    }
+
+
 </script>
 
 </body>

@@ -29,7 +29,8 @@ class Blog(models.Model):
 
 
 class Comment(models.Model):
-    father = models.ForeignKey('self', models.SET_NULL, verbose_name='父', null=True)
+    father = models.ForeignKey('self', models.SET_NULL, verbose_name='父', null=True,related_name='father_comment')
+    ancestor = models.ForeignKey('self', models.SET_NULL, verbose_name='祖宗', null=True,related_name='ancestor_comment')
     comment_author = models.ForeignKey(User)
     comment_content = models.TextField(max_length=200)
     comment_time = models.DateTimeField(auto_now=True)
