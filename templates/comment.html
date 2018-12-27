@@ -1,114 +1,201 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>评论插件</title>
-<script type="text/javascript" src="/static/js/jquery.min.js"></script>
-<script type="text/javascript" src="/static/js/jquery.comment.js" ></script>
-{#<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>#}
-{#<link rel="stylesheet" type="text/css" href="http://www.jq22.com/jquery/bootstrap-3.3.4.css">#}
-<style>
-	.containera{
-		width: 1000px;
-	}
-	.commentbox{
-		width: 900px;
-		margin: 20px auto;
-	}
-	.mytextarea {
-	    width: 100%;
-	    overflow: auto;
-	    word-break: break-all;
-	    height: 100px;
-	    color: #000;
-	    font-size: 1em;
-	    resize: none;
-	}
-	.comment-list{
-		width: 900px;
-		margin: 20px auto;
-		clear: both;
-		padding-top: 20px;
-	}
-	.comment-list .comment-info{
-		position: relative;
-		margin-bottom: 20px;
-		margin-bottom: 20px;
-		border-bottom: 1px solid #ccc;
-	}
-	.comment-list .comment-info header{
-		width: 10%;
-		position: absolute;
-	}
-	.comment-list .comment-info header img{
-		width: 100%;
-		border-radius: 50%;
-		padding: 5px;
-	}
-	.comment-list .comment-info .comment-right{
-		padding:5px 0px 5px 11%;
-	}
-	.comment-list .comment-info .comment-right h3{
-		margin: 5px 0px;
-	}
-	.comment-list .comment-info .comment-right .comment-content-header{
-		height: 25px;
-	}
-	.comment-list .comment-info .comment-right .comment-content-header span,.comment-list .comment-info .comment-right .comment-content-footer span{
-		padding-right: 2em;
-		color: #aaa;
-	}
-	.comment-list .comment-info .comment-right .comment-content-header span,.comment-list .comment-info .comment-right .comment-content-footer span.reply-btn,.send,.reply-list-btn{
-		cursor: pointer;
-	}
-	.comment-list .comment-info .comment-right .reply-list {
-		border-left: 3px solid #ccc;
-		padding-left: 7px;
-	}
-	.comment-list .comment-info .comment-right .reply-list .reply{
-		border-bottom: 1px dashed #ccc;
-	}
-	.comment-list .comment-info .comment-right .reply-list .reply div span{
-		padding-left: 10px;
-	}
-	.comment-list .comment-info .comment-right .reply-list .reply p span{
-		padding-right: 2em;
-		color: #aaa;
-	}
-</style>
+    <meta charset="UTF-8">
+    <title>评论插件</title>
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.comment.js"></script>
+    {#<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>#}
+    {#<link rel="stylesheet" type="text/css" href="http://www.jq22.com/jquery/bootstrap-3.3.4.css">#}
+    <style>
+        .containera {
+            width: 1000px;
+        }
+
+        .commentbox {
+            width: 900px;
+            margin: 20px auto;
+        }
+
+        .mytextarea {
+            width: 100%;
+            overflow: auto;
+            word-break: break-all;
+            height: 100px;
+            color: #000;
+            font-size: 1em;
+            resize: none;
+        }
+
+        .comment-list {
+            width: 900px;
+            margin: 20px auto;
+            clear: both;
+            padding-top: 20px;
+        }
+
+        .comment-list .comment-info {
+            position: relative;
+            margin-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .comment-list .comment-info header {
+            width: 10%;
+            position: absolute;
+        }
+
+        .comment-list .comment-info header img {
+            width: 100%;
+            border-radius: 50%;
+            padding: 5px;
+        }
+
+        .comment-list .comment-info .comment-right {
+            padding: 5px 0px 5px 11%;
+        }
+
+        .comment-list .comment-info .comment-right h3 {
+            margin: 5px 0px;
+        }
+
+        .comment-list .comment-info .comment-right .comment-content-header {
+            height: 25px;
+        }
+
+        .comment-list .comment-info .comment-right .comment-content-header span, .comment-list .comment-info .comment-right .comment-content-footer span {
+            padding-right: 2em;
+            color: #aaa;
+        }
+
+        .comment-list .comment-info .comment-right .comment-content-header span, .comment-list .comment-info .comment-right .comment-content-footer span.reply-btn, .send, .reply-list-btn {
+            cursor: pointer;
+        }
+
+        .comment-list .comment-info .comment-right .reply-list {
+            border-left: 3px solid #ccc;
+            padding-left: 7px;
+        }
+
+        .comment-list .comment-info .comment-right .reply-list .reply {
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .comment-list .comment-info .comment-right .reply-list .reply div span {
+            padding-left: 10px;
+        }
+
+        .comment-list .comment-info .comment-right .reply-list .reply p span {
+            padding-right: 2em;
+            color: #aaa;
+        }
+    </style>
 </head>
 <body>
-
 <div class="containera">
-	<div class="commentbox">
-		<textarea cols="80" rows="50" placeholder="来说几句吧......" class="mytextarea" id="content"></textarea>
-		<div class="btn btn-info pull-right" id="comment">评论</div>
-	</div>
-	<div class="comment-list">
-	</div>
+    <div class="commentbox">
+        <textarea cols="80" rows="50" placeholder="来说几句吧......" class="mytextarea" id="content"></textarea>
+        <div class="btn btn-info pull-right" id="comment">评论</div>
+    </div>
+    <div class="comment-list" id="comment-list">
+    </div>
+    <div class="comment-list">
+        <div class="comment-info">
+            <div class="comment-right" id="comment-right"></div>
+        </div>
+    </div>
 </div>
 
 
 <script type="text/javascript">
-	//初始化数据
-	var arr = [
-		{id:1,img:"./images/img.jpg",replyName:"帅大叔",beReplyName:"匿名",content:"同学聚会，看到当年追我的屌丝开着宝马车带着他老婆来了，他老婆是我隔壁宿舍的同班同学，心里后悔极了。",time:"2017-10-17 11:42:53",address:"深圳",osname:"",browse:"谷歌",replyBody:[]},
-		{id:2,img:"./images/img.jpg",replyName:"匿名",beReplyName:"",content:"到菜市场买菜，看到一个孩子在看摊，我问：“一只鸡多少钱？” 那孩子回答：“23。” 我又问：“两只鸡多少钱？” 孩子愣了一下，一时间没算过来，急中生智大吼一声：“一次只能买一只！”",time:"2017-10-17 11:42:53",address:"深圳",osname:"",browse:"谷歌",replyBody:[{id:3,img:"",replyName:"帅大叔",beReplyName:"匿名",content:"来啊，我们一起吃鸡",time:"2017-10-17 11:42:53",address:"",osname:"",browse:"谷歌"}]},
-		{id:3,img:"./images/img.jpg",replyName:"帅大叔",beReplyName:"匿名",content:"同学聚会，看到当年追我的屌丝开着宝马车带着他老婆来了，他老婆是我隔壁宿舍的同班同学，心里后悔极了。",time:"2017-10-17 11:42:53",address:"深圳",osname:"win10",browse:"谷歌",replyBody:[]}
-	];
-	$(function(){
-		$(".comment-list").addCommentList({data:arr,add:""});
-		$("#comment").click(function(){
-			var obj = new Object();
-			obj.img="./images/img.jpg";
-			obj.replyName="匿名";
-			obj.content=$("#content").val();
-			obj.browse="深圳";
-			obj.osname="win10";
-			obj.replyBody="";
-			$(".comment-list").addCommentList({data:[],add:obj});
-		});
-	})
+{#        $('#reply-ceshi').click(function () {#}
+{#             $('#reply_com').html("<div class='replybox'><textarea cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send'>发送</span></div>")#}
+{#        });#}
+
+
+    $(function () {
+        com();
+        $('#comment').click(function () {
+            $.post('/comment/', {
+                'comment_content': $('#content').val(),
+                'blog_name': blog_name,
+            }, function (resp) {
+                resp = JSON.parse(resp)
+                if (resp['success']) {
+                    com();
+                } else {
+                    alert(resp['error']);
+                    window.location.href = '/login/'
+                }
+            })
+        });
+
+    });
+
+
+function com(){
+            $.post('/whole_passage/?blog_name=' + blog_name, {}, function (resp) {
+                resp = JSON.parse(resp);
+                var comment_text = '';
+                if (resp['success']) {
+                    for (var k = 0; k < resp['comments'].length; k++) {
+                        var child_text = '';
+                        comment_text += `<div class="comment-info">
+                                                <header><img src="./images/img.jpg"></header>
+                                                <div class="comment-right">
+                                                    <h3>` + resp['comments'][k]['comment_author'] + `</h3>
+                                                    <div class="comment-content-header"><span><i class="glyphicon glyphicon-time"></i> ` + resp['comments'][k]['comment_time'] + `</span></div>
+                                                    <p class="content">` + resp['comments'][k]['comment_content'] + `</p>
+                                                    <div class="comment-content-footer">
+                                                        <div class="row">
+                                                            <div class="col-md-10">
+                                                            </div>
+                                                            <div class="col-md-2"><span class="reply-btn" id="reply-ceshi` + k + `" onclick="ch_comment(this, ` + k + `,` + resp['comments'][k]['comment_id'] + `)">回复</span></div>
+                                                            <div id="reply_com` + k + `"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="reply-list">
+                                                        <div class="reply" id ="reply` + k + `>`;
+                        for (var m = 0; m < resp['comments'][k]['children'].length; m++) {
+                            child_text += `<div><a href="javascript:void(0)">` + resp['comments'][k]['children'][m]['comment_author'] + `</a>:<a href="javascript:void(0)">@` + resp['comments'][k]['children'][m]['father_name'] + `</a><span>` + resp['comments'][k]['children'][m]['comment_content'] + `</span></div>
+        <p><span>`+resp['comments'][k]['children'][m]['comment_time']+`</span> <span class="reply-list-btn" onclick="child_child_comment(this, ` + (k+100)*(m+25) + `,` + resp['comments'][k]['children'][m]['comment_id'] + `)">回复</span></p> <div id="reply_child` + (k+100)*(m+25) + `"></div>` ;
+                        }
+                        var end_text = `</div></div></div></div>`;
+                        comment_text += child_text + end_text;
+
+                    }
+                    $('#comment-list').html(comment_text);
+                }
+            })
+        }
+
+function ch_comment(e, i, comment_id) {
+        var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
+        $('#reply_com' + i).html(html_str)
+    }
+function child_child_comment(e, i, comment_id) {
+        var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
+        $('#reply_child' + i).html(html_str)
+    }
+function child_reply(e, i, comment_id) {
+            $.post('/children_comment/', {
+                'comment_content': $('#child_context' + i).val(),
+                'blog_name': blog_name,
+                'father_comment_id': comment_id
+            }, function (resp) {
+                resp = JSON.parse(resp)
+                if (resp['success']) {
+                    com();
+                } else {
+                    alert(resp['error']);
+                    window.location.href = '/login/'
+                }
+            })
+
+        }
+
+
 </script>
 
 </body>

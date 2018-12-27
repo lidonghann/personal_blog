@@ -6,5 +6,5 @@ from django.contrib import admin
 admin.site.register(models.Blog)
 admin.site.register(models.Tags)
 admin.site.register(models.Comment)
-
+# admin.site.register(models.ChildrenComment)
 # Register your models here.
