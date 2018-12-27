@@ -60,7 +60,7 @@
     $(document).ready(function () {
         $.post('/index/', {},
             function (resp) {
-                resp = JSON.parse(resp)
+                resp = JSON.parse(resp);
                 if (resp['success']) {
                     var publish = '';
                     if(resp['data'].length>11){

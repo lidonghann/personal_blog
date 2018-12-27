@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 import json
-from models import Blog, Comment, Tags
+from models import Blog, Comment, Tags, Saying
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import sys
@@ -42,10 +42,12 @@ def logout(request):
 def index(request):
     resp = {'success': 0, 'error': '', 'data': [], 'tags': []}
     if request.method == 'POST':
+        page = int(request.POST.get('page', 1))
+        size = int(request.POST.get('size', 0))
         username = request.session.get('username', '')
         resp['success'] = 1
         resp['data'].append(username)
-        all_blog = Blog.objects.order_by('-blog_time')
+        all_blog = Blog.objects.order_by('-blog_time')[(page-1)*size:page*size]
         for blog in all_blog:
             blog_att = {}
             blog_att['top'] = blog.top
@@ -61,11 +63,8 @@ def index(request):
         tags = Tags.objects.all()
         tags_set = set([tag for tag in tags])
         [resp['tags'].append(tag.tag) for tag in tags_set]
-        # print resp['tags']
-        # all_blog[0].reading_quantity += 1
-        # print all_blog[0].blog_name
-        # Blog.objects.filter(blog_name=all_blog[0].blog_name).update(reading_quantity=all_blog[0].reading_quantity)
-        return HttpResponse(json.dumps(resp))
+        resp['total'] = Blog.objects.all().count()
+        return HttpResponse(json.dumps(resp), content_type='application/json')
     else:
         return render(request, 'index.html')
 
@@ -124,7 +123,6 @@ def get_com_dict(comment):
 def get_comments(blog_name=''):
     result = []
     for comment in Comment.objects.filter(blog__blog_name=blog_name, father__isnull=True):
-        print comment,22222222
         father_dict = get_com_dict(comment)
         father_dict['children'] = []
         for child_com in Comment.objects.filter(ancestor=comment).order_by('comment_time'):
@@ -142,7 +140,6 @@ def whole_passage(request):
     if request.method == 'POST':
         resp['success'] = 1
         resp['comments'] = get_comments(blog_name)
-        print json.dumps(resp['comments'])
         blog = Blog.objects.filter(blog_name=blog_name).first()
         blog_att = {}
         blog_att['top'] = blog.top
@@ -211,3 +208,15 @@ def comment(request):
             resp['error'] = '请先登录后再评论'
         return HttpResponse(json.dumps(resp))
 
+
+@csrf_exempt
+def saying(request):
+    say_list = []
+    all_saying = Saying.objects.all().order_by('-say_time')
+    for saying in all_saying:
+        say_dict = {}
+        say_dict['say_context'] = saying.say_context
+        say_dict['say_time'] = str(saying.say_time).split('+')[0]
+        say_dict['image'] = saying.image
+        say_list.append(say_dict)
+    return render(request, 'moodList.html', {'all_saying': say_list})

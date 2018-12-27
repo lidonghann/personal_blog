@@ -9,11 +9,12 @@
 <link href="/static/plugin/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="/static/css/common.css"/>
 <link href="logo.ico" rel="shortcut icon"/>
-<script src="/static/plugin/jquery.min.js"></script>
+{#<script src="/static/plugin/jquery.min.js"></script>#}
+<script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
 <script src="/static/plugin/bootstrap/js/bootstrap.min.js"></script>
-<!--<script type="text/javascript" src="plugin/jquery.page.js"></script>-->
-<!--<script src="js/common.js"></script>-->
-<!--<script src="js/snowy.js"></script>-->
+<link href="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.js"></script>
+<script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.min.js"></script>
 
 <body>
 {% include "base.html" %}
@@ -79,6 +80,7 @@
 
                         <!--文章列表开始-->
                         <div class="contentList">
+                            <div id="dataContainer" style="border:1px solid;border-bottom-color:black;"></div>
                             <div id="blog_all">
                             </div>
                         </div>
@@ -144,79 +146,145 @@
         backToTopFun();
     });
     $(document).ready(function () {
-        $.post('/index/', {},
-            function (resp) {
-                resp = JSON.parse(resp)
-                if (resp['success']) {
-                    var str_notice = '';
-                    var str = '';
-                    var str_top = '';
-                    var tag = '';
-                    for (var i = 1; i < resp['data'].length; i++) {
-                        if (resp['data'][i]['top'] == 0) {
-                            str += `<div class="panel panel-default">
+        load_data(0);
+{#        $.post('/index/', {},#}
+{#            function (resp) {#}
+{#                resp = JSON.parse(resp, 11111111)#}
+{#                if (resp['success']) {#}
+{#                    var str_notice = '';#}
+{#                    var str = '';#}
+{#                    var str_top = '';#}
+{#                    var tag = '';#}
+{#                    for (var i = 1; i < resp['data'].length; i++) {#}
+{#                        if (resp['data'][i]['top'] == 0) {#}
+{##}
+{#                        } else if(resp['data'][i]['top'] == 1){#}
+{#                            str_top = `<div class="panel panel-default contenttop">#}
+{#                        <a href="/whole_passage/?blog_name=`+resp['data'][i]['blog_name'] +`">#}
+{#                            <strong>博主置顶</strong>#}
+{#                            <h3 class="title">` + resp['data'][i]['blog_name'] + `</h3>#}
+{#                            <p class="overView">` + resp['data'][i]['blog_context'] + `</p>#}
+{#                        </a>#}
+{#                    </div>`#}
+{#                        }else {#}
+{#                            str_notice = `<div class="panel panel-default sitetip">#}
+{#                        <a href="/whole_passage/?blog_name=`+resp['data'][i]['blog_name'] +`">#}
+{#                            <strong>站点公告</strong>#}
+{#                            <h3 class="title">`+ resp['data'][i]['blog_name']+`</h3>#}
+{#                            <p class="overView">` + resp['data'][i]['blog_context'] + `</p>#}
+{#                        </a>#}
+{#                    </div>`#}
+{#                        }#}
+{#                    }#}
+{#                    for (var j=0; j<resp['tags'].length; j++){#}
+{#                        tag += `<a class="label label-default">`+ resp['tags'][j]+`</a>`#}
+{#                    }#}
+{#                    $("#blog_all").html(str);#}
+{#                    $('#top').html(str_top);#}
+{#                    $('#notice').html(str_notice);#}
+{#                    $('#tag').html(tag);#}
+{#                }#}
+{#            })#}
+    });
+    function load_data(type) {
+        $('#blog_all').pagination({
+            dataSource: '/index/',//接口 参数
+            prevText: '上一页',
+            nextText: '下一页',
+            className: 'paginationjs-theme-red',
+            alias: {
+                pageNumber: 'page',
+                pageSize: 'size',
+            },
+            pageSize: 2,
+            showGoInput: true,
+            showGoButton: true,
+            locator: 'a.data',
+            totalNumberLocator: function (response) {//处理页数
+                return response.total;
+            },
+            ajax: {
+                type: 'POST',
+                beforeSend: function () {//请求前处理
+                    $("#dataContainer").html('加载中...');
+                }
+            },
+            callback: function (data, pagination) {//请求后处理
+                var html = "";
+                var str_top = "";
+                var str_notice = ""
+                console.log(data.length)
+                for(var i=1;i<=data.length;i++){
+                    console.log(data)
+                    if(data[i] != undefined){
+                        if (data[i]['top'] == 0) {
+                        console.log(data[i],22222222222)
+                        html += load_html(data[i]);
+                    }
+{#                    else if(data[i]['top'] == 1){#}
+{#                            str_top = `<div class="panel panel-default contenttop">#}
+{#                        <a href="/whole_passage/?blog_name=`+data[i]['blog_name'] +`">#}
+{#                            <strong>博主置顶</strong>#}
+{#                            <h3 class="title">` + data[i]['blog_name'] + `</h3>#}
+{#                            <p class="overView">` + data[i]['blog_context'] + `</p>#}
+{#                        </a>#}
+{#                    </div>`#}
+{#                        }else {#}
+{#                            str_notice = `<div class="panel panel-default sitetip">#}
+{#                        <a href="/whole_passage/?blog_name=`+data[i]['blog_name'] +`">#}
+{#                            <strong>站点公告</strong>#}
+{#                            <h3 class="title">`+ data[i]['blog_name']+`</h3>#}
+{#                            <p class="overView">` + data[i]['blog_context'] + `</p>#}
+{#                        </a>#}
+{#                    </div>`#}
+{#                        }#}
+                    }
+                }
+                $("#dataContainer").html(html);
+{#                $('#top').html(str_top);#}
+{#                $('#notice').html(str_notice);#}
+{#                $('#tag').html(tag);#}
+            }
+        })
+    }
+    function load_html(item) {
+        return `<div class="panel panel-default">
                                 <div class="panel-body">
                                     <div class="contentleft">
-                                        <h4><a class="title" href="/whole_passage/?blog_name=` + resp['data'][i]['blog_name'] + `">` + resp['data'][i]['blog_name'] + `</a></h4>
+                                        <h4><a class="title" href="/whole_passage/?blog_name=` + item['blog_name'] + `">` + item['blog_name'] + `</a></h4>
                                         <p>
-                                            ` + get_a_tags(resp, i) + `
+
                                         </p>
-                                        <p class="overView" style="display: -webkit-box;   overflow: hidden;   white-space: normal!important;   text-overflow: ellipsis;   word-wrap: break-word;   -webkit-line-clamp: 3;   -webkit-box-orient: vertical;"> ` + resp['data'][i]['blog_context'] + `
+                                        <p class="overView" style="display: -webkit-box;   overflow: hidden;   white-space: normal!important;   text-overflow: ellipsis;   word-wrap: break-word;   -webkit-line-clamp: 3;   -webkit-box-orient: vertical;"> ` + item['blog_context'] + `
                                             </p>
                                         <p><span class="count"><i class="glyphicon glyphicon-user"></i><a
-                                                href="#">` + resp['data'][i]['author'] + `</a></span> <span class="count"><i
-                                                class="glyphicon glyphicon-eye-open"></i>阅读:` + resp['data'][i]['reading_quantity'] + `</span><span
+                                                href="#">` + item['author'] + `</a></span> <span class="count"><i
+                                                class="glyphicon glyphicon-eye-open"></i>阅读:` + item['reading_quantity'] + `</span><span
                                                 class="count"><i
-                                                class="glyphicon glyphicon-comment"></i><a href="/whole_passage/?blog_name=`+resp['data'][i]['blog_name'] +`">评论:` + resp['data'][i]['comment_quantity'] + `</span></a><span class="count"><i
-                                                class="glyphicon glyphicon-time"></i>` + resp['data'][i]['blog_time'] + `</span></p>
+                                                class="glyphicon glyphicon-comment"></i><a href="/whole_passage/?blog_name=`+item['blog_name'] +`">评论:` + item + `</span></a><span class="count"><i
+                                                class="glyphicon glyphicon-time"></i>` + item['blog_time'] + `</span></p>
                                     </div>
                                     <div class="contentImage">
                                         <div class="row">
-                                            ` + remove_img(resp, i) + `
+                                            ` + remove_img(item) + `
 
                                         </div>
                                     </div>
                                 </div>
                             </div>`;
-                        } else if(resp['data'][i]['top'] == 1){
-                            str_top = `<div class="panel panel-default contenttop">
-                        <a href="/whole_passage/?blog_name=`+resp['data'][i]['blog_name'] +`">
-                            <strong>博主置顶</strong>
-                            <h3 class="title">` + resp['data'][i]['blog_name'] + `</h3>
-                            <p class="overView">` + resp['data'][i]['blog_context'] + `</p>
-                        </a>
-                    </div>`
-                        }else {
-                            str_notice = `<div class="panel panel-default sitetip">
-                        <a href="/whole_passage/?blog_name=`+resp['data'][i]['blog_name'] +`">
-                            <strong>站点公告</strong>
-                            <h3 class="title">`+ resp['data'][i]['blog_name']+`</h3>
-                            <p class="overView">` + resp['data'][i]['blog_context'] + `</p>
-                        </a>
-                    </div>`
-                        }
-                    }
-                    for (var j=0; j<resp['tags'].length; j++){
-                        tag += `<a class="label label-default">`+ resp['tags'][j]+`</a>`
-                    }
-                    $("#blog_all").html(str);
-                    $('#top').html(str_top);
-                    $('#notice').html(str_notice);
-                    $('#tag').html(tag);
-                }
-            })
-    });
-
-    function get_a_tags(resp, i) {
-        var str1 = '';
-        for (var j = 0; j < resp['data'][i]['blog_label'].length; j++) {
-            str1 += '<a class="label label-default">' + resp['data'][i]['blog_label'][j] + '</a>';
-        }
-        return str1
     }
-    function remove_img(resp, i) {
-        if (resp['data'][i]['image'] != "") {
-            str_img = '<a href="#" class="thumbnail w_thumbnail"><img id="pic" src="/media/' + resp['data'][i]['image'] + '" alt="..."></a>'
+
+{#    function get_a_tags(item) {#}
+{#        var str1 = '';#}
+{#        console.log(item['blog_label'])#}
+{#        for (var j = 0; j < item['blog_label'].length; j++) {#}
+{#            str1 += '<a class="label label-default">' + item['blog_label'][j] + '</a>';#}
+{#        }#}
+{#        return str1#}
+{#    }#}
+    function remove_img(item) {
+        if (item['image'] != "") {
+            str_img = '<a href="#" class="thumbnail w_thumbnail"><img id="pic" src="/media/' + item['image'] + '" alt="..."></a>'
             return str_img
         }
         else {

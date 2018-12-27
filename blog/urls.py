@@ -28,4 +28,5 @@ urlpatterns = [
     url(r'^all_article/', views.all_article),
     url(r'^comment/', views.comment),
     url(r'^children_comment/', views.comment),
+    url(r'^saying/', views.saying),
 ]

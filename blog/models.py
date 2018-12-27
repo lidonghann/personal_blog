@@ -17,7 +17,7 @@ class Blog(models.Model):
     top = models.IntegerField(default=0)
     blog_time = models.DateTimeField(auto_now=True)
     blog_name = models.CharField(max_length=50)
-    blog_context = models.TextField(max_length=1000)
+    blog_context = models.TextField(max_length=5000)
     author = models.ForeignKey(User)
     comment_quantity = models.IntegerField(default=0)
     reading_quantity = models.IntegerField(default=0)
@@ -49,3 +49,9 @@ class Comment(models.Model):
 #
 #     def __unicode__(self):
 #         return self.comment_content
+
+
+class Saying(models.Model):
+    say_context = models.TextField(max_length=5000)
+    say_time = models.DateTimeField(auto_now=True)
+    image = models.ImageField(upload_to='saying_configure_image', blank=True)
