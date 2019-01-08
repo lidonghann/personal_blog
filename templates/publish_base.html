@@ -67,9 +67,10 @@
                         resp['data'].length = 11;
                     }
                     for (var i = 1; i < resp['data'].length; i++) {
+                        var time = resp['data'][i]['blog_time'].substring(5,10);
                         publish += `<li>
                                    <a href="/whole_passage/?blog_name=` + resp['data'][i]['blog_name'] + `">` + resp['data'][i]['blog_name'] + `</a>
-                                    </li>`
+                                    &nbsp;<span style="color: #9c9c9c">`+ time+`</span></li>`
                     }
                     $('#new_publish').html(publish);
                 }

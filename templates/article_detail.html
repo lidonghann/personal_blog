@@ -95,7 +95,7 @@
     function get_a_tags(resp) {
         var str1 = '';
         for (var j = 0; j < resp['data'][0]['blog_label'].length; j++) {
-            str1 += '<a class="label label-default">' + resp['data'][0]['blog_label'][j] + '</a>';
+            str1 += '<a class="label label-default" href="/tag/?tag_name='+ resp['data'][0]['blog_label'][j]+'">' + resp['data'][0]['blog_label'][j] + '</a>';
         }
         return str1
     }

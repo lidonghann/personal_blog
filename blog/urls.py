@@ -28,4 +28,12 @@ urlpatterns = [
     url(r'^all_article/', views.all_article),
     url(r'^comment/', views.comment),
     url(r'^children_comment/', views.comment),
+    url(r'^saying/', views.saying),
+    url(r'^tag/', views.tag),
+    url(r'^personal_center/', views.personal_center),
+    url(r'^msg_board/', views.msg_board),
+    url(r'^user_blog/', views.user_blog),
+    url(r'^msg_update/', views.msg_update),
+    url(r'^children_msg/', views.msg_update),
+
 ]

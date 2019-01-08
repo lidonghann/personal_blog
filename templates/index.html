@@ -197,7 +197,7 @@
                         }
                     }
                     for (var j=0; j<resp['tags'].length; j++){
-                        tag += `<a class="label label-default">`+ resp['tags'][j]+`</a>`
+                        tag += `<a class="label label-default" href="/tag/?tag_name=`+resp['tags'][j]+`">`+ resp['tags'][j]+`</a>`
                     }
                     $("#blog_all").html(str);
                     $('#top').html(str_top);
@@ -210,13 +210,13 @@
     function get_a_tags(resp, i) {
         var str1 = '';
         for (var j = 0; j < resp['data'][i]['blog_label'].length; j++) {
-            str1 += '<a class="label label-default">' + resp['data'][i]['blog_label'][j] + '</a>';
+            str1 += '<a class="label label-default" href="/tag/?tag_name='+ resp['data'][i]['blog_label'][j]+'">' + resp['data'][i]['blog_label'][j] + '</a>';
         }
         return str1
     }
     function remove_img(resp, i) {
         if (resp['data'][i]['image'] != "") {
-            str_img = '<a href="#" class="thumbnail w_thumbnail"><img id="pic" src="/media/' + resp['data'][i]['image'] + '" alt="..."></a>'
+            var str_img = '<a href="#" class="thumbnail w_thumbnail"><img id="pic" src="/media/' + resp['data'][i]['image'] + '" alt="..."></a>'
             return str_img
         }
         else {

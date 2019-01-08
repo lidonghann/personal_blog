@@ -1,0 +1,7 @@
+{% extends 'article.html' %}
+{% block js_tagname %}
+    var tag_name = '{{ tag_name }}'
+    {% endblock %}
+{% block js  %}
+            dataSource: '/tag/?tag_name='+tag_name,//接口 参数
+    {% endblock %}

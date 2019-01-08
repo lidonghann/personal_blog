@@ -2,95 +2,11 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>评论插件</title>
+    <title>李东韩博客</title>
     <script type="text/javascript" src="/static/js/jquery.min.js"></script>
     <script type="text/javascript" src="/static/js/jquery.comment.js"></script>
-    {#<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>#}
-    {#<link rel="stylesheet" type="text/css" href="http://www.jq22.com/jquery/bootstrap-3.3.4.css">#}
-    <style>
-        .containera {
-            width: 1000px;
-        }
+    <link rel="stylesheet" type="text/css" href="/static/css/comment_base.css">
 
-        .commentbox {
-            width: 900px;
-            margin: 20px auto;
-        }
-
-        .mytextarea {
-            width: 100%;
-            overflow: auto;
-            word-break: break-all;
-            height: 100px;
-            color: #000;
-            font-size: 1em;
-            resize: none;
-        }
-
-        .comment-list {
-            width: 900px;
-            margin: 20px auto;
-            clear: both;
-            padding-top: 20px;
-        }
-
-        .comment-list .comment-info {
-            position: relative;
-            margin-bottom: 20px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .comment-list .comment-info header {
-            width: 10%;
-            position: absolute;
-        }
-
-        .comment-list .comment-info header img {
-            width: 100%;
-            border-radius: 50%;
-            padding: 5px;
-        }
-
-        .comment-list .comment-info .comment-right {
-            padding: 5px 0px 5px 11%;
-        }
-
-        .comment-list .comment-info .comment-right h3 {
-            margin: 5px 0px;
-        }
-
-        .comment-list .comment-info .comment-right .comment-content-header {
-            height: 25px;
-        }
-
-        .comment-list .comment-info .comment-right .comment-content-header span, .comment-list .comment-info .comment-right .comment-content-footer span {
-            padding-right: 2em;
-            color: #aaa;
-        }
-
-        .comment-list .comment-info .comment-right .comment-content-header span, .comment-list .comment-info .comment-right .comment-content-footer span.reply-btn, .send, .reply-list-btn {
-            cursor: pointer;
-        }
-
-        .comment-list .comment-info .comment-right .reply-list {
-            border-left: 3px solid #ccc;
-            padding-left: 7px;
-        }
-
-        .comment-list .comment-info .comment-right .reply-list .reply {
-            border-bottom: 1px dashed #ccc;
-        }
-
-        .comment-list .comment-info .comment-right .reply-list .reply div span {
-            padding-left: 10px;
-        }
-
-        .comment-list .comment-info .comment-right .reply-list .reply p span {
-            padding-right: 2em;
-            color: #aaa;
-        }
-    </style>
 </head>
 <body>
 <div class="containera">
@@ -100,20 +16,15 @@
     </div>
     <div class="comment-list" id="comment-list">
     </div>
-    <div class="comment-list">
-        <div class="comment-info">
-            <div class="comment-right" id="comment-right"></div>
-        </div>
-    </div>
+{#    <div class="comment-list">#}
+{#        <div class="comment-info">#}
+{#            <div class="comment-right" id="comment-right"></div>#}
+{#        </div>#}
+{#    </div>#}
 </div>
 
 
 <script type="text/javascript">
-{#        $('#reply-ceshi').click(function () {#}
-{#             $('#reply_com').html("<div class='replybox'><textarea cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send'>发送</span></div>")#}
-{#        });#}
-
-
     $(function () {
         com();
         $('#comment').click(function () {
@@ -151,7 +62,7 @@ function com(){
                                                         <div class="row">
                                                             <div class="col-md-10">
                                                             </div>
-                                                            <div class="col-md-2"><span class="reply-btn" id="reply-ceshi` + k + `" onclick="ch_comment(this, ` + k + `,` + resp['comments'][k]['comment_id'] + `)">回复</span></div>
+                                                            <div class="col-md-2"><span class="reply-btn" style="color: #2aabd2" id="reply-ceshi` + k + `" onclick="ch_comment(this, ` + k + `,` + resp['comments'][k]['comment_id'] + `)">回复</span></div>
                                                             <div id="reply_com` + k + `"></div>
                                                         </div>
                                                     </div>
@@ -159,7 +70,7 @@ function com(){
                                                         <div class="reply" id ="reply` + k + `>`;
                         for (var m = 0; m < resp['comments'][k]['children'].length; m++) {
                             child_text += `<div><a href="javascript:void(0)">` + resp['comments'][k]['children'][m]['comment_author'] + `</a>:<a href="javascript:void(0)">@` + resp['comments'][k]['children'][m]['father_name'] + `</a><span>` + resp['comments'][k]['children'][m]['comment_content'] + `</span></div>
-        <p><span>`+resp['comments'][k]['children'][m]['comment_time']+`</span> <span class="reply-list-btn" onclick="child_child_comment(this, ` + (k+100)*(m+25) + `,` + resp['comments'][k]['children'][m]['comment_id'] + `)">回复</span></p> <div id="reply_child` + (k+100)*(m+25) + `"></div>` ;
+        <p><span>`+resp['comments'][k]['children'][m]['comment_time']+`</span> <span class="reply-list-btn" style="color: #2aabd2" onclick="child_child_comment(this, ` + resp['comments'][k]['children'][m]['comment_id'] + `,` + resp['comments'][k]['children'][m]['comment_id'] + `)">回复</span></p> <div id="` + resp['comments'][k]['children'][m]['comment_id'] + `"></div>` ;
                         }
                         var end_text = `</div></div></div></div>`;
                         comment_text += child_text + end_text;
@@ -171,12 +82,12 @@ function com(){
         }
 
 function ch_comment(e, i, comment_id) {
-        var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
+        var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' style="color: #2aabd2" id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
         $('#reply_com' + i).html(html_str)
     }
 function child_child_comment(e, i, comment_id) {
-        var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
-        $('#reply_child' + i).html(html_str)
+        var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' style="color: #2aabd2" id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
+        $('#'+comment_id).html(html_str)
     }
 function child_reply(e, i, comment_id) {
             $.post('/children_comment/', {
@@ -192,10 +103,7 @@ function child_reply(e, i, comment_id) {
                     window.location.href = '/login/'
                 }
             })
-
         }
-
-
 </script>
 
 </body>

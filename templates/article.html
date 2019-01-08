@@ -17,29 +17,11 @@
 <link href="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.css" rel="stylesheet">
 <script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.js"></script>
 <script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.min.js"></script>
-
-
-<!--<script src="js/snowy.js"></script>-->
-{#<script type="text/javascript">#}
-{#	#}
-{#$(function(){#}
-{#	$("#page").Page({#}
-{#	  totalPages: 7,//分页总数#}
-{#	  liNums: 5,//分页的数字按钮数(建议取奇数)#}
-{#	  activeClass: 'activP', //active 类样式定义#}
-{#	  callBack : function(page){#}
-{#			//console.log(page)#}
-{#	  }#}
-{#  });#}
-{#})#}
-{#</script>#}
-
 <body>
 	{% include "base.html" %}
 	<div class="w_container">
 		<div class="container">
 			<div class="row w_main_row">
-				
 				<ol class="breadcrumb w_breadcrumb">
 				  <li><a href="/index/">首页</a></li>
 				  <li class="active">文章</li>
@@ -49,17 +31,8 @@
 				<div class="col-lg-9 col-md-9 w_main_left">
 					<div class="panel panel-default">
 					  <div class="panel-body contentList">
-{#					  	<div id="article"></div>#}
-{#                       <div id="pagination"></div>#}
-{#						<div id="page">#}
-{#							#}
-{#						</div>#}
-
                           <div id="dataContainer" style="border:1px solid;border-bottom-color:black;"></div>
-
                         <div id="demo"></div>
-						
-						
 					  </div>
 					</div>
 					
@@ -83,13 +56,17 @@
 	<!--<div class="snow-container"></div>-->
 </body>
 <script>
+    {% block js_tagname %}
+    {% endblock %}
     $(document).ready(function () {
         load_data(0);
     });
 
 function load_data(type) {
         $('#demo').pagination({
+    {% block js  %}
             dataSource: '/all_article/',//接口 参数
+    {% endblock %}
             prevText: '上一页',
             nextText: '下一页',
             className: 'paginationjs-theme-red',
@@ -123,7 +100,6 @@ function load_data(type) {
         })
     }
     function load_html(item) {
-{#        return "<div><span>" + item["blog_time"] + "</span>---<span>" + item["blog_name"] + "</span>---<span>" + item["author"] + "</span></div>";#}
         return `<div class="panel panel-default">
                                 <div class="panel-body">
                                     <div class="contentleft">
@@ -154,13 +130,13 @@ function load_data(type) {
     function get_a_tags(item) {
         var str1 = '';
         for (var j = 0; j < item['blog_label'].length; j++) {
-            str1 += '<a class="label label-default">' + item['blog_label'][j] + '</a>';
+            str1 += '<a class="label label-default" href="/tag/?tag_name='+item['blog_label'][j] +'">' + item['blog_label'][j] + '</a>';
         }
         return str1
     }
     function remove_img(item) {
         if (item['image'] != "") {
-            str_img = '<a href="#" class="thumbnail w_thumbnail"><img id="pic" src="/media/' + item['image'] + '" alt="..."></a>'
+            var str_img = '<a href="#" class="thumbnail w_thumbnail"><img id="pic" src="/media/' + item['image'] + '" alt="..."></a>'
             return str_img
         }
         else {
