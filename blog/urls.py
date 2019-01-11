@@ -35,5 +35,8 @@ urlpatterns = [
     url(r'^user_blog/', views.user_blog),
     url(r'^msg_update/', views.msg_update),
     url(r'^children_msg/', views.msg_update),
+    url(r'^news_spider/', views.news_spider),
+    url(r'^video/', views.video),
+    url(r'^video_detailed/', views.video_detailed),
 
 ]

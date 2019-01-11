@@ -6,10 +6,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 import json
-from models import Blog, Comment, Tags, Saying, MesBoard
+from models import Blog, Comment, Tags, Saying, MesBoard, Video
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import sys
+import re
+import requests
+from bs4 import BeautifulSoup
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -163,7 +167,7 @@ def all_article(request):
     if request.method == 'POST':
         page = int(request.POST.get('page', 1))
         size = int(request.POST.get('size', 0))
-        all_blog = Blog.objects.all().order_by('-blog_time')[(page-1)*size:page*size]
+        all_blog = Blog.objects.all().order_by('-blog_time')[(page - 1) * size:page * size]
         resp['success'] = 1
         for blog in all_blog:
             blog_att = {}
@@ -179,7 +183,7 @@ def all_article(request):
             resp['data'].append(blog_att)
         resp['total'] = Blog.objects.all().count()
         request.session['data'] = resp['data']
-        return HttpResponse(json.dumps(resp),content_type='application/json')
+        return HttpResponse(json.dumps(resp), content_type='application/json')
     else:
         return render(request, 'article.html')
 
@@ -196,7 +200,7 @@ def comment(request):
             blog_name = request.POST.get('blog_name')
             blog = Blog.objects.filter(blog_name=blog_name).first()
             com = Comment(comment_author=username, comment_content=str(comment_content), blog=blog)
-            if father_comment_id:# 回复评论
+            if father_comment_id:  # 回复评论
                 father = Comment.objects.filter(id=father_comment_id).first()
                 com.father = father
                 com.ancestor = father.ancestor if father.ancestor else father
@@ -312,6 +316,7 @@ def user_blog(request):
     else:
         return render(request, 'tag_article.html', {'tag_name': tag_name})
 
+
 @csrf_exempt
 def msg_update(request):
     resp = {'success': 0, 'error': '', 'data': []}
@@ -337,13 +342,16 @@ def msg_update(request):
 def msg_board(request):
     resp = {'success': 0, 'error': '', 'data': []}
     if request.method == 'POST':
-        for msg in MesBoard.objects.filter(father__isnull=True).all():
+        page = int(request.POST.get('page', 1))
+        size = int(request.POST.get('size', 0))
+        for msg in MesBoard.objects.filter(father__isnull=True).all().order_by('-msg_time')[
+                   (page - 1) * size:page * size]:
             father_msg = get_msg_dict(msg)
             father_msg['children'] = []
-            for child_msg in MesBoard.objects.filter(ancestor=msg).order_by('msg_time'):
+            for child_msg in MesBoard.objects.filter(ancestor=msg).order_by('-msg_time'):
                 father_msg['children'].append(get_msg_dict(child_msg))
             resp['data'].append(father_msg)
-        print resp['data'], 333333333
+        resp['total'] = MesBoard.objects.filter(father__isnull=True).all().count()
         resp['success'] = 1
         return HttpResponse(json.dumps(resp))
     else:
@@ -359,3 +367,76 @@ def get_msg_dict(msg):
     msg_att['msg_author'] = msg.msg_author.username
     msg_att['msg_time'] = str(msg.msg_time).split('+')[0]
     return msg_att
+
+
+def news_spider(request):
+    data = []
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}
+    url = 'https://news.sina.com.cn/china/'
+    res = requests.get(url)
+    # 使用UTF-8编码
+    res.encoding = 'UTF-8'
+    # 使用剖析器为html.parser
+    soup = BeautifulSoup(res.text, 'html.parser')
+    for news in soup.select('li'):
+        new = {}
+        h2 = news.select('a')
+        for i in h2:
+            ss = i.text.encode("utf-8")
+            if len(i.text) > 5 and not ss.replace(' ', '').strip().isalpha():
+                pattern = re.compile('href=\"(.+?)\"')
+                a = re.findall(pattern, str(i))
+                new['title'] = ss
+                new['content'] = a[0]
+                if new:
+                    data.append(new)
+    paginator = Paginator(data, 30)
+    page = request.GET.get('page', 1)
+    try:
+        contacts = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        contacts = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        contacts = paginator.page(paginator.num_pages)
+    return render(request, 'news.html', {'news': contacts})
+
+
+def video(request):
+    video_list = []
+    all_video = Video.objects.all().order_by('-upload_time')
+    for a_video in all_video:
+        video_dict = {}
+        video_dict['video_title'] = a_video.video_title
+        video_dict['upload_time'] = str(a_video.upload_time).split('+')[0][0:10]
+        video_dict['video_path'] = a_video.video_path
+        video_dict['upload_user'] = a_video.upload_user.username
+        video_list.append(video_dict)
+    print video_list
+    paginator = Paginator(video_list, 10)
+    page = request.GET.get('page', 1)
+    try:
+        contacts = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        contacts = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        contacts = paginator.page(paginator.num_pages)
+    return render(request, 'all_video.html', {'all_video': contacts})
+
+
+def video_detailed(request):
+    video_title = request.GET.get('video_name', '')
+    print video_title
+    video_attr = Video.objects.filter(video_title=video_title).first()
+    print video_attr
+    video_dict = {}
+    video_dict['video_title'] = video_attr.video_title
+    video_dict['upload_time'] = str(video_attr.upload_time).split('+')[0]
+    video_dict['video_path'] = video_attr.video_path
+    video_dict['upload_user'] = video_attr.upload_user.username
+    print video_dict['video_path']
+    return render(request, 'video_detailed.html', {'video_dict': video_dict})

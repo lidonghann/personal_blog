@@ -24,6 +24,7 @@ class Blog(models.Model):
     image = models.ImageField(upload_to='blog_configure_image', blank=True)
     blog_label = models.ManyToManyField(Tags, blank=True)
 
+
     def __unicode__(self):
         return self.blog_name
 
@@ -55,3 +56,10 @@ class Saying(models.Model):
     say_context = models.TextField(max_length=5000)
     say_time = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='saying_configure_image', blank=True)
+
+
+class Video(models.Model):
+    video_path = models.FileField(upload_to="video")
+    upload_user = models.ForeignKey(User)
+    upload_time = models.DateTimeField(auto_now_add=True)
+    video_title = models.CharField(max_length=50)

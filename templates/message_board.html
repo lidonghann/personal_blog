@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>李东韩博客</title>
+</head>
+{% load static %}
     <link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/static/css/common.css"/>
-    <link rel="stylesheet" type="text/css" href="/static/css/article_detail.css"/>
+{#    <link rel="stylesheet" type="text/css" href="/static/css/article_detail.css"/>#}
     <link href="logo.ico" rel="shortcut icon"/>
-    <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
-    <script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <!--<script type="text/javascript" src="plugin/jquery.page.js"></script>-->
-    <script src="/static/js/common.js"></script>
+{#    <script src="/static/js/common.js"></script>#}
     <link rel="stylesheet" type="text/css" href="/static/css/comment_base.css"/>
-    <!--<script src="js/snowy.js"></script>-->
-</head>
+    <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+{#    <script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>#}
+    <!--<script type="text/javascript" src="plugin/jquery.page.js"></script>-->
+
+    <link href="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.js"></script>
+    <script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.min.js"></script>
 <body>
 {% include "base.html" %}
 <div class="w_container">
@@ -25,8 +30,10 @@
                 <div class="btn btn-info pull-right" onclick="leaving_msg()">留言</div>
             </div>
             <div class="comment-list" id="msg_con">
-
+                <div id="dataContainer" style="border:1px solid;border-bottom-color:black;"></div>
+                <div id="demo"></div>
             </div>
+
         </div>
     </div>
 
@@ -35,43 +42,65 @@
 </body>
 <script>
     $(document).ready(function () {
-        show_msg()
+        load_data(0)
     })
+    function load_data(type) {
+        $('#demo').pagination({
+            dataSource: '/msg_board/',//接口 参数
+            prevText: '上一页',
+            nextText: '下一页',
+            className: 'paginationjs-theme-red',
+            alias: {
+                pageNumber: 'page',
+                pageSize: 'size'
+            },
+            pageSize: 5,
+            showGoInput: true,
+            showGoButton: true,
+            locator: 'a.data',
+            totalNumberLocator: function (response) {//处理页数
+                return response.total;
+            },
+            ajax: {
+                type: 'POST',
+                beforeSend: function () {//请求前处理
+                    $("#dataContainer").html('加载中...');
+                }
+            },
+            callback: function (data, pagination) {//请求后处理
+                var msg = ""
+                for (var i = 0; i < data.length; i++) {
+                    var child_msg = "";
 
-    function show_msg() {
-        $.post('/msg_board/', {},
-            function (resp) {
-                resp = JSON.parse(resp)
-                var msg = "";
-                if (resp['success']) {
-                    for (var i = 0; i < resp['data'].length; i++) {
-                        var child_msg = "";
+                    if(data[i] != undefined){
                         msg += `<div class="comment-info">
                     <div class="comment-right" id="comment-right">
-                        <h3>` + resp['data'][i]['msg_author'] + `</h3>
-                        <div class="comment-content-header"><span><i class="glyphicon glyphicon-time"></i> ` + resp['data'][i]['msg_time'] + `</div>
-                        <p class="content">` + resp['data'][i]['msg_content'] + `</p>
+                        <h3>` + data[i]['msg_author'] + `</h3>
+                        <div class="comment-content-header"><span><i class="glyphicon glyphicon-time"></i> ` + data[i]['msg_time'] + `</div>
+                        <p class="content">` + data[i]['msg_content'] + `</p>
                         <div class="comment-content-footer">
                             <div class="row">
                                 <div class="col-md-10">
 						        </div>
-                                <div class="col-md-2"><span class="reply-btn" style="color: #2aabd2" id="reply-ceshi` + i + `" onclick="ch_msg(this, ` + i + `,` + resp['data'][i]['msg_id'] + `)">回复</span></div>
+                                <div class="col-md-2"><span class="reply-btn" style="color: #2aabd2" id="reply-ceshi` + i + `" onclick="ch_msg(this, ` + i + `,` + data[i]['msg_id'] + `)">回复</span></div>
                                 <div id="reply_com` + i + `"></div>
                             </div>
                         </div>
                         <div class="reply-list">
                             <div class="reply" id="reply` + i + `">`
-                        for (var j = 0; j < resp['data'][i]['children'].length; j++) {
-                            child_msg += `<div><a href="javascript:void(0)">` + resp['data'][i]['children'][j]['msg_author'] + `</a>:<a href="javascript:void(0)">@` + resp['data'][i]['children'][j]['father_name'] + `</a><span>` + resp['data'][i]['children'][j]['msg_content'] + `</span>
+                    for (var j = 0; j < data[i]['children'].length; j++) {
+                        child_msg += `<div><a href="javascript:void(0)">` + data[i]['children'][j]['msg_author'] + `</a>:<a href="javascript:void(0)">@` + data[i]['children'][j]['father_name'] + `</a><span>` + data[i]['children'][j]['msg_content'] + `</span>
                                 </div>
-                                <p><span>` + resp['data'][i]['children'][j]['msg_time'] + `</span> <span class="reply-list-btn" style="color: #2aabd2" onclick="child_child_msg(this, ` + resp['data'][i]['children'][j]['msg_id'] + `,` + resp['data'][i]['children'][j]['msg_id'] + `)">回复</span></p><div id="` + resp['data'][i]['children'][j]['msg_id'] + `"></div>` ;
+                                <p><span>` + data[i]['children'][j]['msg_time'] + `</span> <span class="reply-list-btn" style="color: #2aabd2" onclick="child_child_msg(this, ` + data[i]['children'][j]['msg_id'] + `,` + data[i]['children'][j]['msg_id'] + `)">回复</span></p><div id="` + data[i]['children'][j]['msg_id'] + `"></div>`;
                         }
                         var end_text = `</div></div></div></div>`;
                         msg += child_msg + end_text;
                     }
-                    $('#msg_con').html(msg)
+
                 }
-            })
+                $("#dataContainer").html(msg);
+            }
+        })
     }
     function leaving_msg() {
         $.post('/msg_update/', {
@@ -80,7 +109,7 @@
             function (resp) {
                 resp = JSON.parse(resp)
                 if (resp['success']) {
-                    show_msg()
+                    load_data(0)
                 } else {
                     alert(resp['error']);
                     window.location.href = '/login/'
@@ -93,7 +122,7 @@
     }
     function child_child_msg(e, i, msg_id) {
         var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' style="color: #2aabd2" id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + msg_id + `)">发送</span></div>`
-        $('#'+msg_id).html(html_str)
+        $('#' + msg_id).html(html_str)
     }
     function child_reply(e, i, msg_id) {
         $.post('/children_msg/', {
@@ -102,7 +131,7 @@
         }, function (resp) {
             resp = JSON.parse(resp)
             if (resp['success']) {
-                show_msg();
+                load_data(0)
             } else {
                 alert(resp['error']);
                 window.location.href = '/login/'
