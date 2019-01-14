@@ -1,0 +1,7 @@
+{% extends 'article.html' %}
+{% block js_tagname %}
+    var author = '{{ author }}'
+    {% endblock %}
+{% block js  %}
+            dataSource: '/user_blog/?author='+author,//接口 参数
+    {% endblock %}

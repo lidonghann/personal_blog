@@ -108,7 +108,7 @@ function load_data(type) {
                                         <p class="overView" style="display: -webkit-box;   overflow: hidden;   white-space: normal!important;   text-overflow: ellipsis;   word-wrap: break-word;   -webkit-line-clamp: 3;   -webkit-box-orient: vertical;">` + item['blog_context'] + `
                                             </p>
                                         <p><span class="count"><i class="glyphicon glyphicon-user"></i><a
-                                                href="#">` + item['author'] + `</a></span> <span class="count"><i
+                                                href="/user_blog/?author=`+item['author']+`">` + item['author'] + `</a></span> <span class="count"><i
                                                 class="glyphicon glyphicon-eye-open"></i>阅读:` + item['reading_quantity'] + `</span><span
                                                 class="count"><i
                                                 class="glyphicon glyphicon-comment"></i><a href="/whole_passage/?blog_name=`+item['blog_name'] +`">评论:` + item['comment_quantity'] + `</span></a><span class="count"><i

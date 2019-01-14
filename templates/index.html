@@ -164,7 +164,7 @@
                                         <p class="overView" style="display: -webkit-box;   overflow: hidden;   white-space: normal!important;   text-overflow: ellipsis;   word-wrap: break-word;   -webkit-line-clamp: 3;   -webkit-box-orient: vertical;"> ` + resp['data'][i]['blog_context'] + `
                                             </p>
                                         <p><span class="count"><i class="glyphicon glyphicon-user"></i><a
-                                                href="#">` + resp['data'][i]['author'] + `</a></span> <span class="count"><i
+                                                href="/user_blog/?author=`+resp['data'][i]['author']+`">` + resp['data'][i]['author'] + `</a></span> <span class="count"><i
                                                 class="glyphicon glyphicon-eye-open"></i>阅读:` + resp['data'][i]['reading_quantity'] + `</span><span
                                                 class="count"><i
                                                 class="glyphicon glyphicon-comment"></i><a href="/whole_passage/?blog_name=`+resp['data'][i]['blog_name'] +`">评论:` + resp['data'][i]['comment_quantity'] + `</span></a><span class="count"><i

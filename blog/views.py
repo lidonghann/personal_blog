@@ -44,24 +44,16 @@ def logout(request):
 
 @csrf_exempt
 def index(request):
-    resp = {'success': 0, 'error': '', 'data': [], 'tags': []}
+    resp = {'success': 0, 'error': '', 'username': 0, 'data': [], 'tags': []}
     if request.method == 'POST':
         username = request.session.get('username', '')
+        if username:
+            resp['username'] = 1
         resp['success'] = 1
         resp['data'].append(username)
         all_blog = Blog.objects.order_by('-blog_time')[0:10]
         for blog in all_blog:
-            blog_att = {}
-            blog_att['top'] = blog.top
-            blog_att['blog_name'] = blog.blog_name
-            blog_att['blog_context'] = blog.blog_context
-            blog_att['blog_time'] = str(blog.blog_time).split('+')[0]
-            blog_att['author'] = blog.author.username
-            blog_att['comment_quantity'] = blog.comment_quantity
-            blog_att['reading_quantity'] = blog.reading_quantity
-            blog_att['image'] = str(blog.image)
-            blog_att['blog_label'] = [label.tag for label in blog.blog_label.all()]
-            resp['data'].append(blog_att)
+            resp['data'].append(get_blog(blog))
         tags = Tags.objects.all()
         tags_set = set([tag for tag in tags])
         [resp['tags'].append(tag.tag) for tag in tags_set]
@@ -136,29 +128,33 @@ def get_comments(blog_name=''):
 def whole_passage(request):
     resp = {'success': 0, 'error': '', 'data': [], 'all_data': [], 'comments': []}
     blog_name = request.GET.get('blog_name')
-    # comment_author = request.session['username']
-    # blog_exist = get_object_or_404(Blog, pk=blog_name)
     if request.method == 'POST':
         resp['success'] = 1
         resp['comments'] = get_comments(blog_name)
         blog = Blog.objects.filter(blog_name=blog_name).first()
-        blog_att = {}
-        blog_att['top'] = blog.top
-        blog_att['blog_name'] = blog.blog_name
-        blog_att['blog_context'] = blog.blog_context
-        blog_att['blog_time'] = str(blog.blog_time).split('+')[0]
-        blog_att['author'] = blog.author.username
-        blog_att['comment_quantity'] = blog.comment_quantity
-        blog_att['reading_quantity'] = blog.reading_quantity
-        blog_att['image'] = str(blog.image)
-        blog_att['blog_label'] = [label.tag for label in blog.blog_label.all()]
-        resp['data'].append(blog_att)
-        resp['all_data'] = request.session['data']
+        resp['data'].append(get_blog(blog))
+        all_blog = Blog.objects.all().order_by('-blog_time')
+        for blog in all_blog:
+            resp['all_data'].append(get_blog(blog))
         blog.reading_quantity += 1
         blog.save()
         return HttpResponse(json.dumps(resp))
     else:
         return render(request, 'article_detail.html', {'blog_name': blog_name})
+
+
+def get_blog(blog):
+    blog_att = {}
+    blog_att['top'] = blog.top
+    blog_att['blog_name'] = blog.blog_name
+    blog_att['blog_context'] = blog.blog_context
+    blog_att['blog_time'] = str(blog.blog_time).split('+')[0]
+    blog_att['author'] = blog.author.username
+    blog_att['comment_quantity'] = blog.comment_quantity
+    blog_att['reading_quantity'] = blog.reading_quantity
+    blog_att['image'] = str(blog.image)
+    blog_att['blog_label'] = [label.tag for label in blog.blog_label.all()]
+    return blog_att
 
 
 @csrf_exempt
@@ -170,19 +166,9 @@ def all_article(request):
         all_blog = Blog.objects.all().order_by('-blog_time')[(page - 1) * size:page * size]
         resp['success'] = 1
         for blog in all_blog:
-            blog_att = {}
-            blog_att['top'] = blog.top
-            blog_att['blog_name'] = blog.blog_name
-            blog_att['blog_context'] = blog.blog_context
-            blog_att['blog_time'] = str(blog.blog_time).split('+')[0]
-            blog_att['author'] = blog.author.username
-            blog_att['comment_quantity'] = blog.comment_quantity
-            blog_att['reading_quantity'] = blog.reading_quantity
-            blog_att['image'] = str(blog.image)
-            blog_att['blog_label'] = [label.tag for label in blog.blog_label.all()]
-            resp['data'].append(blog_att)
+            resp['data'].append(get_blog(blog))
         resp['total'] = Blog.objects.all().count()
-        request.session['data'] = resp['data']
+        # request.session['data'] = resp['data']
         return HttpResponse(json.dumps(resp), content_type='application/json')
     else:
         return render(request, 'article.html')
@@ -246,19 +232,8 @@ def tag(request):
         all_blog = Tags.objects.get(tag=tag_name).blog_set.all().order_by('-blog_time')[(page - 1) * size:page * size]
         resp['success'] = 1
         for blog in all_blog:
-            blog_att = {}
-            blog_att['top'] = blog.top
-            blog_att['blog_name'] = blog.blog_name
-            blog_att['blog_context'] = blog.blog_context
-            blog_att['blog_time'] = str(blog.blog_time).split('+')[0]
-            blog_att['author'] = blog.author.username
-            blog_att['comment_quantity'] = blog.comment_quantity
-            blog_att['reading_quantity'] = blog.reading_quantity
-            blog_att['image'] = str(blog.image)
-            blog_att['blog_label'] = [label.tag for label in blog.blog_label.all()]
-            resp['data'].append(blog_att)
+            resp['data'].append(get_blog(blog))
         resp['total'] = Blog.objects.all().count()
-        request.session['data'] = resp['data']
         return HttpResponse(json.dumps(resp), content_type='application/json')
     else:
         return render(request, 'tag_article.html', {'tag_name': tag_name})
@@ -291,30 +266,19 @@ def personal_center(request):
 
 @csrf_exempt
 def user_blog(request):
-    tag_name = request.GET.get('tag_name', '')
+    author = request.GET.get('author', '')
     resp = {'success': 0, 'error': '', 'data': []}
     if request.method == 'POST':
         page = int(request.POST.get('page', 1))
         size = int(request.POST.get('size', 0))
-        all_blog = Tags.objects.get(tag=tag_name).blog_set.all().order_by('-blog_time')[(page - 1) * size:page * size]
+        all_blog = User.objects.get(username=author).blog_set.all().order_by('-blog_time')[(page - 1) * size:page * size]
         resp['success'] = 1
         for blog in all_blog:
-            blog_att = {}
-            blog_att['top'] = blog.top
-            blog_att['blog_name'] = blog.blog_name
-            blog_att['blog_context'] = blog.blog_context
-            blog_att['blog_time'] = str(blog.blog_time).split('+')[0]
-            blog_att['author'] = blog.author.username
-            blog_att['comment_quantity'] = blog.comment_quantity
-            blog_att['reading_quantity'] = blog.reading_quantity
-            blog_att['image'] = str(blog.image)
-            blog_att['blog_label'] = [label.tag for label in blog.blog_label.all()]
-            resp['data'].append(blog_att)
+            resp['data'].append(get_blog(blog))
         resp['total'] = Blog.objects.all().count()
-        request.session['data'] = resp['data']
         return HttpResponse(json.dumps(resp), content_type='application/json')
     else:
-        return render(request, 'tag_article.html', {'tag_name': tag_name})
+        return render(request, 'user_blog.html', {'author': author})
 
 
 @csrf_exempt
