@@ -13,6 +13,9 @@ import sys
 import re
 import requests
 from bs4 import BeautifulSoup
+# from dwebsocket.decorators import accept_websocket
+# import time
+# from util import redisConnect
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -133,11 +136,11 @@ def whole_passage(request):
         resp['comments'] = get_comments(blog_name)
         blog = Blog.objects.filter(blog_name=blog_name).first()
         resp['data'].append(get_blog(blog))
+        blog.reading_quantity += 1
+        blog.save()
         all_blog = Blog.objects.all().order_by('-blog_time')
         for blog in all_blog:
             resp['all_data'].append(get_blog(blog))
-        blog.reading_quantity += 1
-        blog.save()
         return HttpResponse(json.dumps(resp))
     else:
         return render(request, 'article_detail.html', {'blog_name': blog_name})
@@ -404,3 +407,9 @@ def video_detailed(request):
     video_dict['upload_user'] = video_attr.upload_user.username
     print video_dict['video_path']
     return render(request, 'video_detailed.html', {'video_dict': video_dict})
+
+
+def message(request):
+    return render(request, 'message.html')
+
+

@@ -61,10 +61,9 @@ function com(){
                                                             <div id="reply_com` + k + `"></div>
                                                         </div>
                                                     </div>
-                                                    <div class="reply-list">
-                                                        <div class="reply" id ="reply` + k + `>`;
+                                                    <div class="reply-list">`;
                         for (var m = 0; m < resp['comments'][k]['children'].length; m++) {
-                            child_text += `<div><a href="javascript:void(0)">` + resp['comments'][k]['children'][m]['comment_author'] + `</a>:<a href="javascript:void(0)">@` + resp['comments'][k]['children'][m]['father_name'] + `</a><span>` + resp['comments'][k]['children'][m]['comment_content'] + `</span></div>
+                            child_text += `<div class="reply" id ="reply` + k + `><div><a href="javascript:void(0)">` + resp['comments'][k]['children'][m]['comment_author'] + `</a>:<a href="javascript:void(0)">@` + resp['comments'][k]['children'][m]['father_name'] + `</a><span>` + resp['comments'][k]['children'][m]['comment_content'] + `</span></div>
         <p><span>`+resp['comments'][k]['children'][m]['comment_time']+`</span> <span class="reply-list-btn" style="color: #2aabd2" onclick="child_child_comment(this, ` + resp['comments'][k]['children'][m]['comment_id'] + `,` + resp['comments'][k]['children'][m]['comment_id'] + `)">回复</span></p> <div id="` + resp['comments'][k]['children'][m]['comment_id'] + `"></div>` ;
                         }
                         var end_text = `</div></div></div></div>`;
