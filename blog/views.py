@@ -13,9 +13,9 @@ import sys
 import re
 import requests
 from bs4 import BeautifulSoup
-# from dwebsocket.decorators import accept_websocket
-# import time
-# from util import redisConnect
+from dwebsocket.decorators import accept_websocket
+import time
+from util import redisConnect
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -397,19 +397,12 @@ def video(request):
 
 def video_detailed(request):
     video_title = request.GET.get('video_name', '')
-    print video_title
     video_attr = Video.objects.filter(video_title=video_title).first()
-    print video_attr
     video_dict = {}
     video_dict['video_title'] = video_attr.video_title
     video_dict['upload_time'] = str(video_attr.upload_time).split('+')[0]
-    video_dict['video_path'] = video_attr.video_path
+    video_dict['video_path'] = str(video_attr.video_path)
     video_dict['upload_user'] = video_attr.upload_user.username
-    print video_dict['video_path']
-    return render(request, 'video_detailed.html', {'video_dict': video_dict})
-
-
-def message(request):
-    return render(request, 'message.html')
+    return render(request, 'video_demo.html', {'video_dict': json.dumps(video_dict)})
 
 
