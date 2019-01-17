@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>李东韩博客</title>
+    <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+<br>
+<input type="text" id="message" value="Hello, World!"/>
+<button type="button" id="connect_websocket">连接 websocket</button>
+<button type="button" id="connect">发送 message</button>
+<button type="button" id="close_websocket">关闭 websocket</button>
+<h1>Received Messages</h1>
+<div id="messagecontainer">
+
+</div>
+</body>
+<script>
+    $('#close_websocket').click(function () {
+            if (window.s) {
+                window.s.close();//关闭websocket
+                console.log('websocket已关闭');
+            }
+        });
+    $("#connect").click(function(event){
+    if(window.s){
+        window.s.close()
+    }
+    var socket = new WebSocket("ws://"+window.location.host+"/editcode/start_server_script/")
+    socket.onopen=function(){
+        console.log('websocket conneted!')
+    }
+    socket.onmessage=function(event){
+        console.log(event.data)
+    }
+    socket.onclose=function(){
+        console.log('websocket cloase')
+    }
+    //保持连接
+    if(socket.readState == WebSocket.OPEN){
+        socket.onopen()
+    }
+    window.s = socket
+    window.s.send("博主真帅！")
+})
+
+</script>
+</html>

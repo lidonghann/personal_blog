@@ -20,7 +20,7 @@ $.fn.videoCt = function (options) {
             src: []
         },
         theme: 'blue',
-        commentFile: 'comment.json'
+        commentFile: '/static/comment.json'
     };
     var opts = $.extend({},defaults, options);
     var intOpts = {
