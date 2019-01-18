@@ -71,3 +71,12 @@ class BlogAdmin(admin.ModelAdmin):
     ordering = ('-upload_time',)
     list_filter = ('upload_user', 'upload_time')  # 过滤器
     search_fields = ('video_title',)  # 搜索字段
+
+
+@admin.register(models.Music)
+class BlogAdmin(admin.ModelAdmin):
+    list_display = ('music_title', 'singer', 'upload_user', 'upload_time')
+    list_per_page = 50
+    ordering = ('-upload_time',)
+    list_filter = ('upload_user', 'upload_time', 'singer')  # 过滤器
+    search_fields = ('music_title', 'singer')  # 搜索字段

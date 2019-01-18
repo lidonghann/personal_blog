@@ -38,5 +38,7 @@ urlpatterns = [
     url(r'^news_spider/', views.news_spider),
     url(r'^video/', views.video),
     url(r'^video_detailed/', views.video_detailed),
-
+    url(r'^all_music/', views.all_music),
+    url(r'^music/', views.music),
+    url(r'^music_singer/', views.find_songs_from_singer),
 ]

@@ -63,3 +63,15 @@ class Video(models.Model):
     upload_user = models.ForeignKey(User)
     upload_time = models.DateTimeField(auto_now_add=True)
     video_title = models.CharField(max_length=50)
+
+
+class Music(models.Model):
+    music_path = models.FileField(upload_to="music")
+    upload_user = models.ForeignKey(User)
+    upload_time = models.DateTimeField(auto_now_add=True)
+    music_title = models.CharField(max_length=50)
+    singer = models.CharField(max_length=50)
+    lyric_path = models.FileField(upload_to="music")
+
+    def __unicode__(self):
+        return self.music_title

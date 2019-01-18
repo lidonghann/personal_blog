@@ -6,8 +6,8 @@ h1.t_nav { border-bottom: #337ab7 1px solid; font-size: 12px; font-weight: norma
 h1.t_nav a { width: 100px; display: block; text-align: center; color: #fff; float: left }
 .n1 { background: #777; }
 .n2 { background: #9d9d9d; }
-.bloglist { width: 100%; margin: 0 15px; background: url(../img/slider/r_title_bg.jpg) repeat-y 78.4% 0;overflow: hidden; }
-.arrow_box { background: #f8f8f8; box-shadow: 0px 1px 0px rgba(255,255,255,.1), inset 0px 1px 1px rgba(214, 214, 214, 0.7); width: 75%; border-radius: 6px; position: relative; padding: 10px 0; margin: 20px 0; }
+.bloglist { width: 100%; margin: 0 15px; background: url(../img/slider/r_title_bg.jpg) repeat-y 78.4% 0;overflow: hidden; white-space: nowrap;}
+.arrow_box { background: #f8f8f8; box-shadow: 0px 1px 0px rgba(255,255,255,.1), inset 0px 1px 1px rgba(214, 214, 214, 0.7); width: 75%; border-radius: 6px; position: relative; padding: 10px 0; margin: 20px 0; white-space: nowrap;}
 .arrow_box img { width: 200px;height: 120px; float: left; margin: 0 20px 0 20px; }
 .arrow_box p { line-height: 24px; padding: 0 20px 20px }
 .arrow_box::before { content: ""; width: 0px; height: 0px; border-style: solid; border-width: 0px 0 20px 22px; border-color: transparent transparent transparent #fff; position: absolute; left: 100%; top: 23px; }/* 三角形 */
@@ -17,7 +17,7 @@ h1.t_nav a { width: 100px; display: block; text-align: center; color: #fff; floa
 .arrow_box:hover { background: #CECCCD; color: #333; text-shadow: #f7f7f7 1px 1px 1px }
 .dateview { position: absolute; left: 107%; top: 20px; width: 125px; line-height: 30px; background: #999; border-radius: 0px 40px; text-align: center; color: #fff }
 
-.sy{ overflow:hidden}
+.sy{ overflow:hidden; white-space: nowrap;display: flex;justify-content: space-between;align-items: center; position:relative;}
 .bloglist_count{
 	height: 0px;
 	margin: 5px 0px;

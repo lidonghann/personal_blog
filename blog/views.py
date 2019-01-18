@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 import json
-from models import Blog, Comment, Tags, Saying, MesBoard, Video
+from models import Blog, Comment, Tags, Saying, MesBoard, Video, Music
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import sys
@@ -16,10 +16,10 @@ from bs4 import BeautifulSoup
 from dwebsocket.decorators import accept_websocket
 import time
 from util import redisConnect
-
+import os
 reload(sys)
 sys.setdefaultencoding('utf-8')
-
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 @csrf_exempt
 def login(request):
@@ -381,8 +381,7 @@ def video(request):
         video_dict['video_path'] = a_video.video_path
         video_dict['upload_user'] = a_video.upload_user.username
         video_list.append(video_dict)
-    print video_list
-    paginator = Paginator(video_list, 10)
+    paginator = Paginator(video_list, 20)
     page = request.GET.get('page', 1)
     try:
         contacts = paginator.page(page)
@@ -405,4 +404,61 @@ def video_detailed(request):
     video_dict['upload_user'] = video_attr.upload_user.username
     return render(request, 'video_demo.html', {'video_dict': json.dumps(video_dict)})
 
+
+def get_music_dict(music):
+    music_dict = {}
+    music_dict['music_path'] = str(music.music_path)
+    music_dict['upload_time'] = str(music.upload_time).split('+')[0][0:10]
+    music_dict['music_title'] = music.music_title
+    music_dict['singer'] = music.singer
+    music_dict['upload_user'] = music.upload_user.username
+    music_dict['lyric_path'] = str(music.lyric_path)
+    return music_dict
+
+
+def music(request):
+    music_name = request.GET.get('music_name', '')
+    music_attr = Music.objects.filter(music_title=music_name).first()
+    get_music_dict(music_attr)
+    with open('media/'+str(music_attr.lyric_path), 'r') as f:
+        lyric = f.read()
+    return render(request, 'mp3.html', {'music_attr': json.dumps(get_music_dict(music_attr)), 'lyric': lyric})
+
+
+def all_music(request):
+    music_list = []
+    musics = Music.objects.all().order_by('-upload_time')
+    print 11111111
+    for music in musics:
+        music_list.append(get_music_dict(music))
+    paginator = Paginator(music_list, 20)
+    page = request.GET.get('page', 1)
+    try:
+        contacts = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        contacts = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        contacts = paginator.page(paginator.num_pages)
+    return render(request, 'all_mp3.html', {'all_music': contacts})
+
+
+def find_songs_from_singer(request):
+    music_list = []
+    singer = request.GET.get('singer', '')
+    musics = Music.objects.filter(singer__icontains=singer).all().order_by('-upload_time')
+    for music in musics:
+        music_list.append(get_music_dict(music))
+    paginator = Paginator(music_list, 20)
+    page = request.GET.get('page', 1)
+    try:
+        contacts = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        contacts = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        contacts = paginator.page(paginator.num_pages)
+    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer':singer})
 

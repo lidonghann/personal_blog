@@ -9,10 +9,8 @@
 <link rel="stylesheet" type="text/css" href="/static/css/moodList.css"/>
 <link rel="stylesheet" href="/static/plugin/jquery.page.css">
 <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
-{#<script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>#}
 <script type="text/javascript" src="/static/plugin/jquery.page.js"></script>
 <script src="/static/js/common.js"></script>
-<!--<script src="js/snowy.js"></script>-->
 <body>
 {% include "base.html" %}
 <div class="w_container">
@@ -24,28 +22,32 @@
 				  <span class="w_navbar_tip">一个人自以为刻骨铭心的回忆。别人也许早已经忘记了</span>
 				</ol>
 			<div class="bloglist">
-				{% for video in all_video %}
+                
+                {% block music %}
+                {% endblock %}
+				{% for music in all_music %}
 			    <ul class="arrow_box">
 			     <div class="sy">
-                     <a href="/video_detailed/?video_name={{ video.video_title }}" target="_blank">&nbsp;&nbsp;&nbsp;{{ video.video_title }}</a>
-                     <div style="text-align: right"><span>上传者：{{ video.upload_user }}</span></div>
+                     <a href="/music/?music_name={{ music.music_title }}" target="_blank">&nbsp;&nbsp;&nbsp;{{ music.music_title }}</a>
+                     <div style="position:absolute; left: 300px"><a target="_blank" href="/music_singer/?singer={{ music.singer }}">歌手：{{ music.singer }}</a></div>
+                     <div style="text-align: right"><span>上传者：{{ music.upload_user }}</span></div>
 			     </div>
 		      	<!--<p class="bloglist_count"><span class="count"><i class="glyphicon glyphicon-user"></i><a href="#">admin</a></span> <span class="count"><i class="glyphicon glyphicon-eye-open"></i>阅读:22</span><span class="count"><i class="glyphicon glyphicon-comment"></i>评论:0</span></p>-->
-			      <span class="dateview">{{ video.upload_time }}</span>
+			      <span class="dateview">{{ music.upload_time }}</span>
 			    </ul>
                 {% endfor %}
             </div>
                 <div >
                     <ul class="pagination">
                        <li class="pure-menu-item"><a href="?page=1" class="pure-menu-link">首页</a></li>
-                       {% if all_video.has_previous %}
-                           <li class="pure-menu-item"><a href="?page={{ all_video.previous_page_number }}" class="pure-menu-link">&laquo上一页</a></li>
+                       {% if all_music.has_previous %}
+                           <li class="pure-menu-item"><a href="?page={{ all_music.previous_page_number }}" class="pure-menu-link">&laquo上一页</a></li>
                        {% endif %}
-                           <li class="pure-menu-item"><span> {{ all_video.number }} / {{ all_video.paginator.num_pages }}</span></li>
-                       {% if all_video.has_next %}
-                           <li class="pure-menu-item"><a href="?page={{ all_video.next_page_number }}" class="pure-menu-link">下一页 &raquo</a></li>
+                           <li class="pure-menu-item"><span> {{ all_music.number }} / {{ all_music.paginator.num_pages }}</span></li>
+                       {% if all_music.has_next %}
+                           <li class="pure-menu-item"><a href="?page={{ all_music.next_page_number }}" class="pure-menu-link">下一页 &raquo</a></li>
                        {% endif %}
-                       <li class="pure-menu-item"><a href="?page={{ all_video.paginator.num_pages }}" class="pure-menu-link">尾页</a></li>
+                       <li class="pure-menu-item"><a href="?page={{ all_music.paginator.num_pages }}" class="pure-menu-link">尾页</a></li>
                     </ul>
                 </div>
 			</div>
