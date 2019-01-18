@@ -41,4 +41,5 @@ urlpatterns = [
     url(r'^all_music/', views.all_music),
     url(r'^music/', views.music),
     url(r'^music_singer/', views.find_songs_from_singer),
+    url(r'^search_mus/', views.search_mus),
 ]

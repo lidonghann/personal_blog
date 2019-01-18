@@ -13,6 +13,7 @@ import sys
 import re
 import requests
 from bs4 import BeautifulSoup
+from django.db.models import Q
 from dwebsocket.decorators import accept_websocket
 import time
 from util import redisConnect
@@ -212,16 +213,8 @@ def saying(request):
         say_dict['say_time'] = str(saying.say_time).split('+')[0]
         say_dict['image'] = saying.image
         say_list.append(say_dict)
-    paginator = Paginator(say_list, 10)
     page = request.GET.get('page', 1)
-    try:
-        contacts = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        contacts = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        contacts = paginator.page(paginator.num_pages)
+    contacts = paging(say_list, 20, page)
     return render(request, 'moodList.html', {'all_saying': contacts})
 
 
@@ -358,16 +351,8 @@ def news_spider(request):
                 new['content'] = a[0]
                 if new:
                     data.append(new)
-    paginator = Paginator(data, 30)
     page = request.GET.get('page', 1)
-    try:
-        contacts = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        contacts = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        contacts = paginator.page(paginator.num_pages)
+    contacts = paging(data, 30, page)
     return render(request, 'news.html', {'news': contacts})
 
 
@@ -381,16 +366,8 @@ def video(request):
         video_dict['video_path'] = a_video.video_path
         video_dict['upload_user'] = a_video.upload_user.username
         video_list.append(video_dict)
-    paginator = Paginator(video_list, 20)
     page = request.GET.get('page', 1)
-    try:
-        contacts = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        contacts = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        contacts = paginator.page(paginator.num_pages)
+    contacts = paging(video_list, 20, page)
     return render(request, 'all_video.html', {'all_video': contacts})
 
 
@@ -428,19 +405,10 @@ def music(request):
 def all_music(request):
     music_list = []
     musics = Music.objects.all().order_by('-upload_time')
-    print 11111111
     for music in musics:
         music_list.append(get_music_dict(music))
-    paginator = Paginator(music_list, 20)
     page = request.GET.get('page', 1)
-    try:
-        contacts = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        contacts = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        contacts = paginator.page(paginator.num_pages)
+    contacts = paging(music_list, 20, page)
     return render(request, 'all_mp3.html', {'all_music': contacts})
 
 
@@ -450,8 +418,28 @@ def find_songs_from_singer(request):
     musics = Music.objects.filter(singer__icontains=singer).all().order_by('-upload_time')
     for music in musics:
         music_list.append(get_music_dict(music))
-    paginator = Paginator(music_list, 20)
     page = request.GET.get('page', 1)
+    contacts = paging(music_list, 20, page)
+    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer': singer})
+
+
+def search_mus(request):
+    music_list = []
+    search_content = request.GET.get('search_content', '')
+    print search_content,2222222
+    print 2111
+    musics = Music.objects.filter(Q(singer__icontains=search_content) | Q(music_title__icontains=search_content))
+    print musics
+    for music in musics:
+        music_list.append(get_music_dict(music))
+    page = request.GET.get('page', 1)
+    contacts = paging(music_list, 20, page)
+
+    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer': search_content})
+
+
+def paging(afferent_list, num, page):
+    paginator = Paginator(afferent_list, num)
     try:
         contacts = paginator.page(page)
     except PageNotAnInteger:
@@ -460,5 +448,4 @@ def find_songs_from_singer(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         contacts = paginator.page(paginator.num_pages)
-    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer':singer})
-
+    return contacts

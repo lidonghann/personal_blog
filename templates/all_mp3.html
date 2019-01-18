@@ -5,6 +5,10 @@
     <title>李东韩博客</title>
 </head>
 {% load static %}
+<link rel="stylesheet" type="text/css" href="/static/mp3/css/normalize.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="/static/mp3/css/search_demo.css">
+<link rel="stylesheet" href="/static/mp3/css/search_style.css">
 <link rel="stylesheet" type="text/css" href="/static/css/common.css"/>
 <link rel="stylesheet" type="text/css" href="/static/css/moodList.css"/>
 <link rel="stylesheet" href="/static/plugin/jquery.page.css">
@@ -12,6 +16,18 @@
 <script type="text/javascript" src="/static/plugin/jquery.page.js"></script>
 <script src="/static/js/common.js"></script>
 <body>
+<script>
+{#    $('#search_music').click(function () {#}
+{#        $.get("/search_mus/", {#}
+{#            'search_content': $('#search_content').val()#}
+{#        }, function (resp) {#}
+{#            resp = JSON.parse(resp)#}
+{#            if (resp['success']){#}
+{##}
+{#            }#}
+{#        })#}
+{#    })#}
+</script>
 {% include "base.html" %}
 <div class="w_container">
 		<div class="container">
@@ -22,7 +38,12 @@
 				  <span class="w_navbar_tip">一个人自以为刻骨铭心的回忆。别人也许早已经忘记了</span>
 				</ol>
 			<div class="bloglist">
-                
+                <div class="search d1">
+                    <form action="/search_mus/" method="get">
+                        <input name="search_content" type="text" placeholder="请输入歌曲名称，歌手...">
+                        <button type="submit" id="search_music"></button>
+                    </form>
+                </div>
                 {% block music %}
                 {% endblock %}
 				{% for music in all_music %}
