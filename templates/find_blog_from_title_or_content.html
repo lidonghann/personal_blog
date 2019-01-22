@@ -1,0 +1,18 @@
+{% extends 'article.html' %}
+{% block search %}
+    var loc_ = location.href;
+    loc_list = loc_.split("=")
+    loc = decodeURIComponent(loc_list[1])
+    load_data(0, loc);
+    var aa = `<p style="color: #449d44">&nbsp;&nbsp;&nbsp;&nbsp;为你找到所有有关<span style="color: red">`+loc+`</span>的博客如下:</p>`;
+    $('#search_con').html(aa)
+{% endblock %}
+{% block search_val %}
+data:{search_blog:loc},
+{% endblock %}
+{% block blog %}
+    <div id="search_con" style="margin-top: 30px"></div>
+{% endblock %}
+{% block js  %}
+    dataSource: '/search_blog/',//接口 参数
+{% endblock %}

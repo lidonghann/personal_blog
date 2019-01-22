@@ -5,6 +5,10 @@
     <title>李东韩博客</title>
 </head>
 {% load static %}
+<link rel="stylesheet" type="text/css" href="/static/mp3/css/normalize.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="/static/mp3/css/search_demo.css">
+<link rel="stylesheet" href="/static/mp3/css/search_style.css">
 <link rel="stylesheet" type="text/css" href="/static/css/common.css"/>
 <link rel="stylesheet" type="text/css" href="/static/css/moodList.css"/>
 <link rel="stylesheet" href="/static/plugin/jquery.page.css">
@@ -24,10 +28,18 @@
 				  <span class="w_navbar_tip">一个人自以为刻骨铭心的回忆。别人也许早已经忘记了</span>
 				</ol>
 			<div class="bloglist">
+                <div class="search d1">
+                    <form action="/search_video/" method="get">
+                        <input name="search_content" type="text" placeholder="请输入视频名称">
+                        <button type="submit" id="search_video"></button>
+                    </form>
+                </div>
+                {% block video %}
+                {% endblock %}
 				{% for video in all_video %}
 			    <ul class="arrow_box">
 			     <div class="sy">
-                     <a href="/video_detailed/?video_name={{ video.video_title }}" target="_blank">&nbsp;&nbsp;&nbsp;{{ video.video_title }}</a>
+                     <a href="/video_detailed/?video_name={{ video.video_title }}" target="_blank">&nbsp;&nbsp;&nbsp;<div id="{{ forloop.counter}}" style="display: flex;justify-content: space-between;align-items: center; position:relative;">{{ video.video_title }}</div></a>
                      <div style="text-align: right"><span>上传者：{{ video.upload_user }}</span></div>
 			     </div>
 		      	<!--<p class="bloglist_count"><span class="count"><i class="glyphicon glyphicon-user"></i><a href="#">admin</a></span> <span class="count"><i class="glyphicon glyphicon-eye-open"></i>阅读:22</span><span class="count"><i class="glyphicon glyphicon-comment"></i>评论:0</span></p>-->
@@ -62,4 +74,16 @@
 		</div>
 	</div>
 </body>
+<script>
+    var news_len = {{ len }}
+    var search_content = "{{ video }}"
+    $(document).ready(function () {
+        for(var i=1; i<=news_len; i++){
+            var news_str = $('#'+i).html()
+            var replace_ = `<div style="color: red">`+search_content +`</div>`
+            var new_re = news_str.replace(search_content, replace_)
+            $('#'+i).html(new_re)
+        }
+    })
+</script>
 </html>

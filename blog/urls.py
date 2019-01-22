@@ -42,4 +42,8 @@ urlpatterns = [
     url(r'^music/', views.music),
     url(r'^music_singer/', views.find_songs_from_singer),
     url(r'^search_mus/', views.search_mus),
+    url(r'^search_video/', views.search_video),
+    url(r'^search_blog/', views.search_blog),
+    url(r'^search_say/', views.search_say),
+    url(r'^search_news/', views.search_news),
 ]

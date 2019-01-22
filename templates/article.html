@@ -26,7 +26,8 @@
 				  <li class="active">文章</li>
 				  <span class="w_navbar_tip">我们长路漫漫，只因学无止境。</span>
 				</ol>
-				
+				{% block blog %}
+                {% endblock %}
 				<div class="col-lg-9 col-md-9 w_main_left">
 					<div class="panel panel-default">
 					  <div class="panel-body contentList">
@@ -56,10 +57,12 @@
     {% block js_tagname %}
     {% endblock %}
     $(document).ready(function () {
-        load_data(0);
+        {% block search %}
+        load_data(0, 0);
+        {% endblock %}
     });
 
-function load_data(type) {
+function load_data(type, loc) {
         $('#demo').pagination({
     {% block js  %}
             dataSource: '/all_article/',//接口 参数
@@ -80,6 +83,8 @@ function load_data(type) {
             },
             ajax: {
                 type: 'POST',
+                {% block search_val %}
+                {% endblock %}
                 beforeSend: function () {//请求前处理
                     $("#dataContainer").html('加载中...');
                 }

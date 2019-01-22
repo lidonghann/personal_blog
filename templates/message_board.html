@@ -80,9 +80,11 @@
                                 <div id="reply_com` + i + `"></div>
                             </div>
                         </div>
-                        <div class="reply-list">`
+                        <div class="reply-list">
+                            <div class="reply" id="reply` + i + `">`
+
                     for (var j = 0; j < data[i]['children'].length; j++) {
-                        child_msg += `<div class="reply" id="reply` + i + `"><div><a href="javascript:void(0)">` + data[i]['children'][j]['msg_author'] + `</a>:<a href="javascript:void(0)">@` + data[i]['children'][j]['father_name'] + `</a><span>` + data[i]['children'][j]['msg_content'] + `</span>
+                        child_msg += `<div><a href="javascript:void(0)">` + data[i]['children'][j]['msg_author'] + `</a>:<a href="javascript:void(0)">@` + data[i]['children'][j]['father_name'] + `</a><span>` + data[i]['children'][j]['msg_content'] + `</span>
                                 </div>
                                 <p><span>` + data[i]['children'][j]['msg_time'] + `</span> <span class="reply-list-btn" style="color: #2aabd2" onclick="child_child_msg(this, ` + data[i]['children'][j]['msg_id'] + `,` + data[i]['children'][j]['msg_id'] + `)">回复</span></p><div id="` + data[i]['children'][j]['msg_id'] + `"></div>`;
                         }

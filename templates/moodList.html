@@ -5,9 +5,13 @@
 	<title>李东韩博客</title>
 </head>
 {% load static %}
+<link rel="stylesheet" type="text/css" href="/static/mp3/css/normalize.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="/static/mp3/css/search_demo.css">
+<link rel="stylesheet" href="/static/mp3/css/search_style.css">
 <link rel="stylesheet" type="text/css" href="/static/css/common.css"/>
-<link rel="stylesheet" type="text/css" href="/static/css/moodList.css"/>
-<link rel="stylesheet" href="/static/plugin/jquery.page.css"
+<link rel="stylesheet" type="text/css" href="/static/css/saying.css"/>
+<link rel="stylesheet" href="/static/plugin/jquery.page.css"/>
 <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
 <script type="text/javascript" src="/static/plugin/jquery.page.js"></script>
 <script src="/static/js/common.js"></script>
@@ -26,13 +30,21 @@
 					
 
 			<div class="bloglist">
+                <div class="search d5">
+                    <form action="/search_say/" method="get">
+                        <input name="search_content" type="text" placeholder="请输入要查找的说说关键字">
+                        <button type="submit" id="search_video"></button>
+                    </form>
+                </div>
+            {% block say %}
+            {% endblock %}
 				{% for say in all_saying %}
 			    <ul class="arrow_box">
 			     <div class="sy">
                      {% if say.image %}
 			            <img src="/media/{{ say.image }}">
                      {% endif %}
-			      <p> {{ say.say_context }}</p>
+                     <p style="word-wrap:break-word;"> <div id="{{ forloop.counter}}">{{ say.say_context }}</div></p>
 			     </div>
 		      	<!--<p class="bloglist_count"><span class="count"><i class="glyphicon glyphicon-user"></i><a href="#">admin</a></span> <span class="count"><i class="glyphicon glyphicon-eye-open"></i>阅读:22</span><span class="count"><i class="glyphicon glyphicon-comment"></i>评论:0</span></p>-->
 			      <span class="dateview">{{ say.say_time }}</span>
@@ -68,4 +80,17 @@
 	<!--snow-->
 	<!--<div class="snow-container"></div>-->
 </body>
+<script>
+    var news_len = {{ len }}
+    var search_content = "{{ say }}"
+    $(document).ready(function () {
+        for(var i=1; i<=news_len; i++){
+            var news_str = $('#'+i).html()
+            var replace_ = `<span style="color: red">`+search_content +`</span>`
+            var new_re = news_str.replace(search_content, replace_)
+            console.log(new_re)
+            $('#'+i).html(new_re)
+        }
+    })
+</script>
 </html>

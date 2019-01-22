@@ -17,6 +17,7 @@ from django.db.models import Q
 from dwebsocket.decorators import accept_websocket
 import time
 from util import redisConnect
+import urllib
 import os
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -179,6 +180,24 @@ def all_article(request):
 
 
 @csrf_exempt
+def search_blog(request):
+    resp = {'success': 0, 'error': '', 'data': []}
+    if request.method == 'POST':
+        search_blog = request.POST.get('search_blog', '')
+        page = int(request.POST.get('page', 1))
+        size = int(request.POST.get('size', 0))
+        all_blog = Blog.objects.filter(Q(blog_name__icontains=search_blog) | Q(blog_context__icontains=search_blog)).order_by('-blog_time')[(page - 1) * size:page * size]
+        resp['success'] = 1
+        for blog in all_blog:
+            resp['data'].append(get_blog(blog))
+        resp['total'] = Blog.objects.filter(Q(blog_name__icontains=search_blog) | Q(blog_context__icontains=search_blog)).count()
+        # request.session['data'] = resp['data']
+        return HttpResponse(json.dumps(resp), content_type='application/json')
+    else:
+        return render(request, 'find_blog_from_title_or_content.html')
+
+
+@csrf_exempt
 def comment(request):
     resp = {'success': 0, 'error': '', 'data': []}
     if request.method == 'POST':
@@ -208,15 +227,18 @@ def saying(request):
     say_list = []
     all_saying = Saying.objects.all().order_by('-say_time')
     for saying in all_saying:
-        say_dict = {}
-        say_dict['say_context'] = saying.say_context
-        say_dict['say_time'] = str(saying.say_time).split('+')[0]
-        say_dict['image'] = saying.image
-        say_list.append(say_dict)
+        say_list.append(get_says_dict(saying))
     page = request.GET.get('page', 1)
     contacts = paging(say_list, 20, page)
     return render(request, 'moodList.html', {'all_saying': contacts})
 
+
+def get_says_dict(saying):
+    say_dict = {}
+    say_dict['say_context'] = saying.say_context
+    say_dict['say_time'] = str(saying.say_time).split('+')[0]
+    say_dict['image'] = saying.image
+    return say_dict
 
 @csrf_exempt
 def tag(request):
@@ -329,8 +351,7 @@ def get_msg_dict(msg):
     return msg_att
 
 
-def news_spider(request):
-    data = []
+def connect():
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}
     url = 'https://news.sina.com.cn/china/'
@@ -339,7 +360,34 @@ def news_spider(request):
     res.encoding = 'UTF-8'
     # 使用剖析器为html.parser
     soup = BeautifulSoup(res.text, 'html.parser')
-    for news in soup.select('li'):
+    return soup
+
+
+def search_news(request):
+    search_content = request.GET.get('search_content', '')
+    data = []
+    for news in connect().select('li'):
+        new = {}
+        h2 = news.select('a')
+        for i in h2:
+            ss = i.text.encode("utf-8")
+            if len(i.text) > 5 and not ss.replace(' ', '').strip().isalpha():
+                pattern = re.compile('href=\"(.+?)\"')
+                a = re.findall(pattern, str(i))
+                new['title'] = ss
+                new['content'] = a[0]
+                if new:
+                    if search_content in ss:
+                        data.append(new)
+    page = request.GET.get('page', 1)
+    contacts = paging(data, 30, page)
+
+    return render(request, 'find_news_from_title.html', {'news': contacts, 'search_content': search_content, 'len': len(data)})
+
+
+def news_spider(request):
+    data = []
+    for news in connect().select('li'):
         new = {}
         h2 = news.select('a')
         for i in h2:
@@ -360,12 +408,7 @@ def video(request):
     video_list = []
     all_video = Video.objects.all().order_by('-upload_time')
     for a_video in all_video:
-        video_dict = {}
-        video_dict['video_title'] = a_video.video_title
-        video_dict['upload_time'] = str(a_video.upload_time).split('+')[0][0:10]
-        video_dict['video_path'] = a_video.video_path
-        video_dict['upload_user'] = a_video.upload_user.username
-        video_list.append(video_dict)
+        video_list.append(get_video_dict(a_video))
     page = request.GET.get('page', 1)
     contacts = paging(video_list, 20, page)
     return render(request, 'all_video.html', {'all_video': contacts})
@@ -374,12 +417,17 @@ def video(request):
 def video_detailed(request):
     video_title = request.GET.get('video_name', '')
     video_attr = Video.objects.filter(video_title=video_title).first()
+    get_video_dict(video_attr)
+    return render(request, 'video_demo.html', {'video_dict': json.dumps(get_video_dict(video_attr))})
+
+
+def get_video_dict(video_attr):
     video_dict = {}
     video_dict['video_title'] = video_attr.video_title
-    video_dict['upload_time'] = str(video_attr.upload_time).split('+')[0]
+    video_dict['upload_time'] = str(video_attr.upload_time).split('+')[0][0:10]
     video_dict['video_path'] = str(video_attr.video_path)
     video_dict['upload_user'] = video_attr.upload_user.username
-    return render(request, 'video_demo.html', {'video_dict': json.dumps(video_dict)})
+    return video_dict
 
 
 def get_music_dict(music):
@@ -420,22 +468,18 @@ def find_songs_from_singer(request):
         music_list.append(get_music_dict(music))
     page = request.GET.get('page', 1)
     contacts = paging(music_list, 20, page)
-    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer': singer})
+    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer': singer, 'len': len(music_list)})
 
 
 def search_mus(request):
     music_list = []
     search_content = request.GET.get('search_content', '')
-    print search_content,2222222
-    print 2111
     musics = Music.objects.filter(Q(singer__icontains=search_content) | Q(music_title__icontains=search_content))
-    print musics
     for music in musics:
         music_list.append(get_music_dict(music))
     page = request.GET.get('page', 1)
     contacts = paging(music_list, 20, page)
-
-    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer': search_content})
+    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer': search_content, 'len': len(music_list)})
 
 
 def paging(afferent_list, num, page):
@@ -449,3 +493,25 @@ def paging(afferent_list, num, page):
         # If page is out of range (e.g. 9999), deliver last page of results.
         contacts = paginator.page(paginator.num_pages)
     return contacts
+
+
+def search_video(request):
+    video_list = []
+    search_content = request.GET.get('search_content', '')
+    videos = Video.objects.filter(Q(video_title__icontains=search_content))
+    for video in videos:
+        video_list.append(get_video_dict(video))
+    page = request.GET.get('page', 1)
+    contacts = paging(video_list, 20, page)
+    return render(request, 'find_video_from_title.html', {'all_video': contacts, 'video': search_content, 'len': len(video_list)})
+
+
+def search_say(request):
+    say_list = []
+    search_content = request.GET.get('search_content', '')
+    says = Saying.objects.filter(Q(say_context__icontains=search_content))
+    for say in says:
+        say_list.append(get_says_dict(say))
+    page = request.GET.get('page', 1)
+    contacts = paging(say_list, 20, page)
+    return render(request, 'find_says_from_content.html', {'all_saying': contacts, 'say': search_content,'len': len(say_list)})

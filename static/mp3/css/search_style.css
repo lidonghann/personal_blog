@@ -34,7 +34,7 @@ form {
   font-size: 16px;
   color: #F9F0DA;
 }
-.d2 {background: #DABB52;}
+
 .d2 input, .d2 button {
   border: none;
   outline: none;
@@ -62,7 +62,6 @@ form {
   font-size: 20px;
   font-weight: bold;
 }
-.d3 {background: #F9F0DA;}
 .d3 form {
   background: #A3D0C3;
 }
@@ -90,7 +89,6 @@ form {
   font-size: 16px;
   color: #F9F0DA;
 }
-.d4 {background: #F15B42;}
 .d4 form {
   background: #F9F0DA;
   border-bottom: 4px solid #be290e;
@@ -119,7 +117,6 @@ form {
   font-size: 20px;
   color: #be290e;
 }
-.d5 {background: #683B4D;}
 .d5 input, .d5 button {
   outline: none;
   background: transparent;
@@ -148,7 +145,6 @@ form {
 .d5 input:focus {
   border-color: #311c24
 }
-.d6 {background: #B46381;}
 .d6 form {
   height: 42px;
 }
