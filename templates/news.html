@@ -39,7 +39,7 @@
 				{% for new in news %}
 			    <ul class="arrow_box">
 			     <div class="sy">
-                     <a href="{{ new.content}}"  target="_blank">&nbsp;&nbsp;&nbsp;<div id="{{ forloop.counter}}" style="display: flex;justify-content: space-between;align-items: center; position:relative;">{{ new.title }}</div></a>
+                     <a href="{{ new.content}}"  target="_blank"><div id="{{ forloop.counter}}" style="display: flex;justify-content: space-between;align-items: center; position:relative;">{{ new.title }}</div></a>
 			     </div>
 			    </ul>
                 {% endfor %}
