@@ -377,8 +377,11 @@ def search_news(request):
                 new['title'] = ss
                 new['content'] = a[0]
                 if new:
-                    if search_content in ss:
-                        data.append(new)
+                    if search_content:
+                        if search_content in ss:
+                            data.append(new)
+                    else:
+                        data = []
     page = request.GET.get('page', 1)
     contacts = paging(data, 30, page)
 
@@ -401,7 +404,7 @@ def news_spider(request):
                     data.append(new)
     page = request.GET.get('page', 1)
     contacts = paging(data, 30, page)
-    return render(request, 'news.html', {'news': contacts})
+    return render(request, 'news.html', {'news': contacts, 'len': -1})
 
 
 def video(request):
@@ -411,7 +414,7 @@ def video(request):
         video_list.append(get_video_dict(a_video))
     page = request.GET.get('page', 1)
     contacts = paging(video_list, 20, page)
-    return render(request, 'all_video.html', {'all_video': contacts})
+    return render(request, 'all_video.html', {'all_video': contacts, 'len': -1})
 
 
 def video_detailed(request):
@@ -457,7 +460,7 @@ def all_music(request):
         music_list.append(get_music_dict(music))
     page = request.GET.get('page', 1)
     contacts = paging(music_list, 20, page)
-    return render(request, 'all_mp3.html', {'all_music': contacts})
+    return render(request, 'all_mp3.html', {'all_music': contacts, 'len': -1})
 
 
 def find_songs_from_singer(request):
@@ -474,12 +477,15 @@ def find_songs_from_singer(request):
 def search_mus(request):
     music_list = []
     search_content = request.GET.get('search_content', '')
-    musics = Music.objects.filter(Q(singer__icontains=search_content) | Q(music_title__icontains=search_content))
-    for music in musics:
-        music_list.append(get_music_dict(music))
+    if search_content:
+        musics = Music.objects.filter(Q(singer__icontains=search_content) | Q(music_title__icontains=search_content))
+        for music in musics:
+            music_list.append(get_music_dict(music))
+    else:
+        music_list = []
     page = request.GET.get('page', 1)
     contacts = paging(music_list, 20, page)
-    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer': search_content, 'len': len(music_list)})
+    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer': search_content, 'len': len(music_list) if len(music_list) else 0})
 
 
 def paging(afferent_list, num, page):
@@ -498,9 +504,12 @@ def paging(afferent_list, num, page):
 def search_video(request):
     video_list = []
     search_content = request.GET.get('search_content', '')
-    videos = Video.objects.filter(Q(video_title__icontains=search_content))
-    for video in videos:
-        video_list.append(get_video_dict(video))
+    if search_content:
+        videos = Video.objects.filter(Q(video_title__icontains=search_content))
+        for video in videos:
+            video_list.append(get_video_dict(video))
+    else:
+        video_list = []
     page = request.GET.get('page', 1)
     contacts = paging(video_list, 20, page)
     return render(request, 'find_video_from_title.html', {'all_video': contacts, 'video': search_content, 'len': len(video_list)})

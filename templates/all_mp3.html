@@ -17,31 +17,20 @@
 <script src="/static/js/common.js"></script>
 <script src="/static/js/heart.js"></script>
 <body>
-<script>
-{#    $('#search_music').click(function () {#}
-{#        $.get("/search_mus/", {#}
-{#            'search_content': $('#search_content').val()#}
-{#        }, function (resp) {#}
-{#            resp = JSON.parse(resp)#}
-{#            if (resp['success']){#}
-{##}
-{#            }#}
-{#        })#}
-{#    })#}
-</script>
+
 {% include "base.html" %}
 <div class="w_container">
 		<div class="container">
 			<div class="row w_main_row">
 				<ol class="breadcrumb w_breadcrumb">
-				  <li><a href="#">首页</a></li>
-				  <li class="active">视频</li>
+				  <li><a href="/index/">首页</a></li>
+				  <li class="active">音乐</li>
 				  <span class="w_navbar_tip">一个人自以为刻骨铭心的回忆。别人也许早已经忘记了</span>
 				</ol>
 			<div class="bloglist">
                 <div class="search d1">
                     <form action="/search_mus/" method="get">
-                        <input name="search_content" type="text" placeholder="请输入歌曲名称，歌手...">
+                        <input name="search_content" type="text" placeholder="请输入歌曲名称，歌手..." id="find_content">
                         <button type="submit" id="search_music"></button>
                     </form>
                 </div>
@@ -90,11 +79,18 @@
     var news_len = {{ len }}
     var search_content = "{{ singer }}"
     $(document).ready(function () {
+        if(news_len==0){
+            $('#find_content').attr('placeholder', search_content)
+        }
+        if(news_len==-1){
+            $('#find_content').attr('placeholder', "请输入歌曲名称，歌手...")
+        }
         for(var i=1; i<=news_len; i++){
             var news_str = $('#'+i).html()
             var replace_ = `<div style="color: red">`+search_content +`</div>`
             var new_re = news_str.replace(search_content, replace_)
             $('#'+i).html(new_re)
+            $('#find_content').attr('placeholder', search_content)
         }
     })
 </script>
