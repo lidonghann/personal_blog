@@ -186,7 +186,7 @@ def search_blog(request):
         search_blog = request.POST.get('search_blog', '')
         page = int(request.POST.get('page', 1))
         size = int(request.POST.get('size', 0))
-        all_blog = Blog.objects.filter(Q(blog_name__icontains=search_blog) | Q(blog_context__icontains=search_blog)).order_by('-blog_time')[(page - 1) * size:page * size]
+        all_blog = Blog.objects.filter(Q(blog_name__icontains=search_blog) | Q(blog_context__icontains=search_blog) | Q(blog_label__tag__icontains=search_blog)).order_by('-blog_time')[(page - 1) * size:page * size]
         resp['success'] = 1
         for blog in all_blog:
             resp['data'].append(get_blog(blog))
