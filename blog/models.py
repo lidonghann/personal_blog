@@ -75,3 +75,15 @@ class Music(models.Model):
 
     def __unicode__(self):
         return self.music_title
+
+
+class CommentVideo(models.Model):
+    father = models.ForeignKey('self', models.SET_NULL, verbose_name='父', null=True, related_name='father_comment')
+    ancestor = models.ForeignKey('self', models.SET_NULL, verbose_name='祖宗', null=True, related_name='ancestor_comment')
+    comment_author = models.ForeignKey(User)
+    comment_content = models.TextField(max_length=200)
+    comment_time = models.DateTimeField(auto_now_add=True)
+    video = models.ForeignKey(Video)
+
+    def __unicode__(self):
+        return self.comment_content

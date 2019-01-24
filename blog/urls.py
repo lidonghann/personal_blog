@@ -46,4 +46,7 @@ urlpatterns = [
     url(r'^search_blog/', views.search_blog),
     url(r'^search_say/', views.search_say),
     url(r'^search_news/', views.search_news),
+    url(r'^video_com/', views.video_comment),
+    url(r'^children_com/', views.video_comment),
+
 ]

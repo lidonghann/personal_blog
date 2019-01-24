@@ -8,10 +8,12 @@
     <script src="/static/js/heart.js"></script>
     <script type='text/javascript' src="/static/js/jquery.min.js"></script>
     <script type='text/javascript' src="/static/js/videoCT.js"></script>
+
     <script>
         var video_dict = {{video_dict|safe}};
 
         var video_path = video_dict['video_path']
+        var video_title = video_dict['video_title']
         window.onload = function () {
             //初始化
             var video = $('#video1').videoCt({
@@ -56,5 +58,131 @@
 <section>
     <video width="100%" height="100%" id="video1"></video>
 </section>
+<link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/css/common.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/comment_base.css"/>
+    <link href="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.js"></script>
+    <script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.min.js"></script>
+<div class="w_container_com">
+    <div class="container">
+        <h4 style="color: #5cb85c; margin-top: 30px; padding-left: 50px; font: italic bold 20px/30px arial,sans-serif;">
+            快来评论吧</h4>
+        <div class="containera">
+            <div class="commentbox">
+                <textarea cols="80" rows="50" placeholder="来说几句吧......" class="mytextarea" id="com_content"></textarea>
+                <div class="btn btn-info pull-right" onclick="comment_video()">评论</div>
+            </div>
+            <div class="comment-list" id="msg_con">
+                <div id="dataContainer" style="border:1px solid;border-bottom-color:black;"></div>
+                <div id="demo"></div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
 </body>
+<script>
+    $(document).ready(function () {
+        load_data(0)
+    })
+    function load_data(type) {
+        $('#demo').pagination({
+            dataSource: '/video_detailed/?video_name='+video_title,//接口 参数
+            prevText: '上一页',
+            nextText: '下一页',
+            className: 'paginationjs-theme-red',
+            alias: {
+                pageNumber: 'page',
+                pageSize: 'size'
+            },
+            pageSize: 5,
+            showGoInput: true,
+            showGoButton: true,
+            locator: 'a.data',
+            totalNumberLocator: function (response) {//处理页数
+                return response.total;
+            },
+            ajax: {
+                type: 'POST',
+                beforeSend: function () {//请求前处理
+                    $("#dataContainer").html('加载中...');
+                }
+            },
+            callback: function (data, pagination) {//请求后处理
+                console.log(data)
+                    console.log(234)
+                var comment_text = '';
+                for (var k = 0; k < data.length; k++) {
+                    if(data[k] != undefined){
+                        var child_text = '';
+                        comment_text += `<div class="comment-info">
+{#                                                <header><img src="./images/img.jpg"></header>#}
+                                                <div class="comment-right">
+                                                    <h3>` + data[k]['comment_author'] + `</h3>
+                                                    <div class="comment-content-header"><span><i class="glyphicon glyphicon-time"></i> ` + data[k]['comment_time'] + `</span></div>
+                                                    <p class="content">` + data[k]['comment_content'] + `</p>
+                                                    <div class="comment-content-footer">
+                                                        <div class="row">
+                                                            <div class="col-md-10">
+                                                            </div>
+                                                            <div class="col-md-2"><span class="reply-btn" style="color: #2aabd2" id="reply-ceshi` + k + `" onclick="ch_comment(this, ` + k + `,` + data[k]['comment_id'] + `)">回复</span></div>
+                                                            <div id="reply_com` + k + `"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="reply-list">`;
+                        for (var m = 0; m < data[k]['children'].length; m++) {
+                            child_text += `<div class="reply" id ="reply` + k + `><div><a href="javascript:void(0)">` + data[k]['children'][m]['comment_author'] + `</a>:<a href="javascript:void(0)">@` + data[k]['children'][m]['father_name'] + `</a><span>` + data[k]['children'][m]['comment_content'] + `</span></div>
+        <p><span>`+data[k]['children'][m]['comment_time']+`</span> <span class="reply-list-btn" style="color: #2aabd2" onclick="child_child_comment(this, ` + data[k]['children'][m]['comment_id'] + `,` + data[k]['children'][m]['comment_id'] + `)">回复</span></p> <div id="` + data[k]['children'][m]['comment_id'] + `"></div>` ;
+                        }
+                        var end_text = `</div></div></div></div>`;
+                        comment_text += child_text + end_text;
+                    }
+
+                }
+                $("#dataContainer").html(comment_text);
+            }
+        })
+    }
+    function comment_video() {
+        $.post('/video_com/', {
+                'com_content': $('#com_content').val(),
+                'video_title': video_title,
+            },
+            function (resp) {
+                resp = JSON.parse(resp)
+                if (resp['success']) {
+                    load_data(0)
+                } else {
+                    alert(resp['error']);
+                    window.location.href = '/login/'
+                }
+            })
+    }
+
+    function ch_comment(e, i, comment_id) {
+        var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' style="color: #2aabd2" id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
+        $('#reply_com' + i).html(html_str)
+    }
+function child_child_comment(e, i, comment_id) {
+        var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' style="color: #2aabd2" id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
+        $('#'+comment_id).html(html_str)
+    }
+function child_reply(e, i, comment_id) {
+            $.post('/children_com/', {
+                'comment_content': $('#child_context' + i).val(),
+                'video_title': video_title,
+                'father_comment_id': comment_id
+            }, function (resp) {
+                resp = JSON.parse(resp)
+                if (resp['success']) {
+                    load_data(0);
+                } else {
+                    alert(resp['error']);
+                    window.location.href = '/login/'
+                }
+            })
+        }
+</script>
 </html>

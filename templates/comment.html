@@ -7,6 +7,9 @@
     <script type="text/javascript" src="/static/js/jquery.comment.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/comment_base.css">
     <script src="/static/js/heart.js"></script>
+    <link href="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.js"></script>
+    <script src="https://cdn.bootcss.com/paginationjs/2.1.4/pagination.min.js"></script>
 
 </head>
 <body>
@@ -16,13 +19,15 @@
         <div class="btn btn-info pull-right" id="comment">评论</div>
     </div>
     <div class="comment-list" id="comment-list">
+        <div id="dataContainer" style="border:1px solid;border-bottom-color:black;"></div>
+        <div id="demo"></div>
     </div>
 </div>
 
 
 <script type="text/javascript">
-    $(function () {
-        com();
+
+    $(document).ready(function () {
         $('#comment').click(function () {
             $.post('/comment/', {
                 'comment_content': $('#content').val(),
@@ -30,51 +35,73 @@
             }, function (resp) {
                 resp = JSON.parse(resp)
                 if (resp['success']) {
-                    com();
+                    load_data(0);
                 } else {
                     alert(resp['error']);
                     window.location.href = '/login/'
                 }
             })
         });
-
+        load_data(0);
     });
 
-
-function com(){
-            $.post('/whole_passage/?blog_name=' + blog_name, {}, function (resp) {
-                resp = JSON.parse(resp);
+function load_data(type) {
+        $('#demo').pagination({
+            dataSource: '/whole_passage/?blog_name=' + blog_name,//接口 参数
+            prevText: '上一页',
+            nextText: '下一页',
+            className: 'paginationjs-theme-red',
+            alias: {
+                pageNumber: 'page',
+                pageSize: 'size'
+            },
+            pageSize: 5,
+            showGoInput: true,
+            showGoButton: true,
+            locator: 'a.comments',
+            totalNumberLocator: function (response) {//处理页数
+                return response.total;
+            },
+            ajax: {
+                type: 'POST',
+                beforeSend: function () {//请求前处理
+                    $("#dataContainer").html('加载中...');
+                }
+            },
+            callback: function (data, pagination) {//请求后处理
                 var comment_text = '';
-                if (resp['success']) {
-                    for (var k = 0; k < resp['comments'].length; k++) {
+                for(var k=0;k<=data.length;k++){
+                    if(data[k] != undefined){
                         var child_text = '';
                         comment_text += `<div class="comment-info">
                                                 <header><img src="./images/img.jpg"></header>
                                                 <div class="comment-right">
-                                                    <h3>` + resp['comments'][k]['comment_author'] + `</h3>
-                                                    <div class="comment-content-header"><span><i class="glyphicon glyphicon-time"></i> ` + resp['comments'][k]['comment_time'] + `</span></div>
-                                                    <p class="content">` + resp['comments'][k]['comment_content'] + `</p>
+                                                    <h3>` + data[k]['comment_author'] + `</h3>
+                                                    <div class="comment-content-header"><span><i class="glyphicon glyphicon-time"></i> ` + data[k]['comment_time'] + `</span></div>
+                                                    <p class="content">` + data[k]['comment_content'] + `</p>
                                                     <div class="comment-content-footer">
                                                         <div class="row">
                                                             <div class="col-md-10">
                                                             </div>
-                                                            <div class="col-md-2"><span class="reply-btn" style="color: #2aabd2" id="reply-ceshi` + k + `" onclick="ch_comment(this, ` + k + `,` + resp['comments'][k]['comment_id'] + `)">回复</span></div>
+                                                            <div class="col-md-2"><span class="reply-btn" style="color: #2aabd2" id="reply-ceshi` + k + `" onclick="ch_comment(this, ` + k + `,` + data[k]['comment_id'] + `)">回复</span></div>
                                                             <div id="reply_com` + k + `"></div>
                                                         </div>
                                                     </div>
                                                     <div class="reply-list">`;
-                        for (var m = 0; m < resp['comments'][k]['children'].length; m++) {
-                            child_text += `<div class="reply" id ="reply` + k + `><div><a href="javascript:void(0)">` + resp['comments'][k]['children'][m]['comment_author'] + `</a>:<a href="javascript:void(0)">@` + resp['comments'][k]['children'][m]['father_name'] + `</a><span>` + resp['comments'][k]['children'][m]['comment_content'] + `</span></div>
-        <p><span>`+resp['comments'][k]['children'][m]['comment_time']+`</span> <span class="reply-list-btn" style="color: #2aabd2" onclick="child_child_comment(this, ` + resp['comments'][k]['children'][m]['comment_id'] + `,` + resp['comments'][k]['children'][m]['comment_id'] + `)">回复</span></p> <div id="` + resp['comments'][k]['children'][m]['comment_id'] + `"></div>` ;
+                        for (var m = 0; m < data[k]['children'].length; m++) {
+                            child_text += `<div class="reply" id ="reply` + k + `><div><a href="javascript:void(0)">` + data[k]['children'][m]['comment_author'] + `</a>:<a href="javascript:void(0)">@` + data[k]['children'][m]['father_name'] + `</a><span>` + data[k]['children'][m]['comment_content'] + `</span></div>
+        <p><span>`+data[k]['children'][m]['comment_time']+`</span> <span class="reply-list-btn" style="color: #2aabd2" onclick="child_child_comment(this, ` + data[k]['children'][m]['comment_id'] + `,` + data[k]['children'][m]['comment_id'] + `)">回复</span></p> <div id="` + data[k]['children'][m]['comment_id'] + `"></div>` ;
                         }
                         var end_text = `</div></div></div></div>`;
                         comment_text += child_text + end_text;
-
                     }
-                    $('#comment-list').html(comment_text);
+
                 }
-            })
-        }
+                $("#dataContainer").html(comment_text);
+            }
+        })
+    }
+
 
 function ch_comment(e, i, comment_id) {
         var html_str = `<div class='replybox'><textarea id="child_context` + i + `" cols='80' rows='50' placeholder='来说几句吧......' class='mytextarea' ></textarea><span class='send' style="color: #2aabd2" id="ch_send` + i + `" onclick="child_reply(this, ` + i + `, ` + comment_id + `)">发送</span></div>`
@@ -92,7 +119,7 @@ function child_reply(e, i, comment_id) {
             }, function (resp) {
                 resp = JSON.parse(resp)
                 if (resp['success']) {
-                    com();
+                    load_data(0);
                 } else {
                     alert(resp['error']);
                     window.location.href = '/login/'

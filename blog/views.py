@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 import json
-from models import Blog, Comment, Tags, Saying, MesBoard, Video, Music
+from models import Blog, Comment, Tags, Saying, MesBoard, Video, Music, CommentVideo
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import sys
@@ -118,15 +118,16 @@ def get_com_dict(comment):
     return comment_att
 
 
-def get_comments(blog_name=''):
+def get_comments(blog_name='', page=1, size=5):
     result = []
-    for comment in Comment.objects.filter(blog__blog_name=blog_name, father__isnull=True):
+    for comment in Comment.objects.filter(blog__blog_name=blog_name, father__isnull=True)[(page - 1) * size:page * size]:
         father_dict = get_com_dict(comment)
         father_dict['children'] = []
         for child_com in Comment.objects.filter(ancestor=comment).order_by('comment_time'):
             father_dict['children'].append(get_com_dict(child_com))
         result.append(father_dict)
-    return result
+    total = Comment.objects.filter(blog__blog_name=blog_name, father__isnull=True).count()
+    return result, total
 
 
 @csrf_exempt
@@ -134,8 +135,10 @@ def whole_passage(request):
     resp = {'success': 0, 'error': '', 'data': [], 'all_data': [], 'comments': []}
     blog_name = request.GET.get('blog_name')
     if request.method == 'POST':
+        page = int(request.POST.get('page', 1))
+        size = int(request.POST.get('size', 0))
         resp['success'] = 1
-        resp['comments'] = get_comments(blog_name)
+        resp['comments'], total = get_comments(blog_name, page, size)
         blog = Blog.objects.filter(blog_name=blog_name).first()
         resp['data'].append(get_blog(blog))
         blog.reading_quantity += 1
@@ -143,6 +146,7 @@ def whole_passage(request):
         all_blog = Blog.objects.all().order_by('-blog_time')
         for blog in all_blog:
             resp['all_data'].append(get_blog(blog))
+        resp['total'] = total
         return HttpResponse(json.dumps(resp))
     else:
         return render(request, 'article_detail.html', {'blog_name': blog_name})
@@ -417,11 +421,21 @@ def video(request):
     return render(request, 'all_video.html', {'all_video': contacts, 'len': -1})
 
 
+@csrf_exempt
 def video_detailed(request):
+    resp = {'success': 0, 'error': '', 'data': []}
     video_title = request.GET.get('video_name', '')
-    video_attr = Video.objects.filter(video_title=video_title).first()
-    get_video_dict(video_attr)
-    return render(request, 'video_demo.html', {'video_dict': json.dumps(get_video_dict(video_attr))})
+    if request.method == 'POST':
+        page = int(request.POST.get('page', 1))
+        size = int(request.POST.get('size', 0))
+        resp['success'] = 1
+        resp['data'], total = get_video_comments(video_title, page, size)
+        resp['total'] = total
+        return HttpResponse(json.dumps(resp))
+    else:
+        video_attr = Video.objects.filter(video_title=video_title).first()
+        get_video_dict(video_attr)
+        return render(request, 'video_demo.html', {'video_dict': json.dumps(get_video_dict(video_attr))})
 
 
 def get_video_dict(video_attr):
@@ -524,3 +538,51 @@ def search_say(request):
     page = request.GET.get('page', 1)
     contacts = paging(say_list, 20, page)
     return render(request, 'find_says_from_content.html', {'all_saying': contacts, 'say': search_content,'len': len(say_list)})
+
+
+def get_video_com_dict(comment):
+    comment_att = {}
+    comment_att['father'] = comment.father_id
+    comment_att['father_name'] = comment.father.comment_author.username if comment.father else ''
+    comment_att['comment_id'] = comment.id
+    comment_att['comment_content'] = comment.comment_content
+    comment_att['comment_author'] = comment.comment_author.username
+    comment_att['comment_time'] = str(comment.comment_time).split('+')[0]
+    return comment_att
+
+
+def get_video_comments(video_name='', page=1, size=5):
+    result = []
+    for comment in CommentVideo.objects.filter(video__video_title=video_name, father__isnull=True)[(page - 1) * size:page * size]:
+        father_dict = get_video_com_dict(comment)
+        father_dict['children'] = []
+        for child_com in CommentVideo.objects.filter(ancestor=comment).order_by('comment_time'):
+            father_dict['children'].append(get_video_com_dict(child_com))
+        result.append(father_dict)
+    total = CommentVideo.objects.filter(video__video_title=video_name, father__isnull=True).count()
+    return result, total
+
+
+@csrf_exempt
+def video_comment(request):
+    resp = {'success': 0, 'error': '', 'data': []}
+    if request.method == 'POST':
+        comment_content = request.POST.get('comment_content')
+        comment_author = request.session.get('username', '')
+        father_comment_id = request.POST.get('father_comment_id', '')
+        if comment_author:
+            username = User.objects.filter(username=comment_author).first()
+            video_title = request.POST.get('video_title')
+            video = Video.objects.filter(video_title=video_title).first()
+            com = CommentVideo(comment_author=username, comment_content=str(comment_content), video=video)
+            if father_comment_id:  # 回复评论
+                father = CommentVideo.objects.filter(id=father_comment_id).first()
+                com.father = father
+                com.ancestor = father.ancestor if father.ancestor else father
+                # video.comment_quantity += 1
+            com.save()
+            video.save()
+            resp['success'] = 1
+        else:
+            resp['error'] = '请先登录后再评论'
+        return HttpResponse(json.dumps(resp))

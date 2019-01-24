@@ -115,7 +115,12 @@ a,a:hover{
 /********************containner开始*********************/
 .w_container{
 	min-height: 100%;
-	padding: 55px 0px 40px 0px;
+	padding: 55px 0px 40px 150px;
+}
+.w_container_com{
+	min-height: 100%;
+	padding: 55px 0px 40px 150px;
+	margin-top: 800px;
 }
 .w_main_row{
 	/*padding-left: 15px;
