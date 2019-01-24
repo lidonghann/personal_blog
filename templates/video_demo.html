@@ -147,7 +147,7 @@
     }
     function comment_video() {
         $.post('/video_com/', {
-                'com_content': $('#com_content').val(),
+                'comment_content': $('#com_content').val(),
                 'video_title': video_title,
             },
             function (resp) {

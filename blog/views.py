@@ -19,9 +19,11 @@ import time
 from util import redisConnect
 import urllib
 import os
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 @csrf_exempt
 def login(request):
@@ -120,7 +122,8 @@ def get_com_dict(comment):
 
 def get_comments(blog_name='', page=1, size=5):
     result = []
-    for comment in Comment.objects.filter(blog__blog_name=blog_name, father__isnull=True)[(page - 1) * size:page * size]:
+    for comment in Comment.objects.filter(blog__blog_name=blog_name, father__isnull=True)[
+                   (page - 1) * size:page * size]:
         father_dict = get_com_dict(comment)
         father_dict['children'] = []
         for child_com in Comment.objects.filter(ancestor=comment).order_by('comment_time'):
@@ -190,11 +193,13 @@ def search_blog(request):
         search_blog = request.POST.get('search_blog', '')
         page = int(request.POST.get('page', 1))
         size = int(request.POST.get('size', 0))
-        all_blog = Blog.objects.filter(Q(blog_name__icontains=search_blog) | Q(blog_context__icontains=search_blog) | Q(blog_label__tag__icontains=search_blog)).order_by('-blog_time')[(page - 1) * size:page * size]
+        all_blog = Blog.objects.filter(Q(blog_name__icontains=search_blog) | Q(blog_context__icontains=search_blog) | Q(
+            blog_label__tag__icontains=search_blog)).order_by('-blog_time')[(page - 1) * size:page * size]
         resp['success'] = 1
         for blog in all_blog:
             resp['data'].append(get_blog(blog))
-        resp['total'] = Blog.objects.filter(Q(blog_name__icontains=search_blog) | Q(blog_context__icontains=search_blog)).count()
+        resp['total'] = Blog.objects.filter(
+            Q(blog_name__icontains=search_blog) | Q(blog_context__icontains=search_blog)).count()
         # request.session['data'] = resp['data']
         return HttpResponse(json.dumps(resp), content_type='application/json')
     else:
@@ -243,6 +248,7 @@ def get_says_dict(saying):
     say_dict['say_time'] = str(saying.say_time).split('+')[0]
     say_dict['image'] = saying.image
     return say_dict
+
 
 @csrf_exempt
 def tag(request):
@@ -293,7 +299,8 @@ def user_blog(request):
     if request.method == 'POST':
         page = int(request.POST.get('page', 1))
         size = int(request.POST.get('size', 0))
-        all_blog = User.objects.get(username=author).blog_set.all().order_by('-blog_time')[(page - 1) * size:page * size]
+        all_blog = User.objects.get(username=author).blog_set.all().order_by('-blog_time')[
+                   (page - 1) * size:page * size]
         resp['success'] = 1
         for blog in all_blog:
             resp['data'].append(get_blog(blog))
@@ -389,7 +396,8 @@ def search_news(request):
     page = request.GET.get('page', 1)
     contacts = paging(data, 30, page)
 
-    return render(request, 'find_news_from_title.html', {'news': contacts, 'search_content': search_content, 'len': len(data)})
+    return render(request, 'find_news_from_title.html',
+                  {'news': contacts, 'search_content': search_content, 'len': len(data)})
 
 
 def news_spider(request):
@@ -462,7 +470,7 @@ def music(request):
     music_name = request.GET.get('music_name', '')
     music_attr = Music.objects.filter(music_title=music_name).first()
     get_music_dict(music_attr)
-    with open('media/'+str(music_attr.lyric_path), 'r') as f:
+    with open('media/' + str(music_attr.lyric_path), 'r') as f:
         lyric = f.read()
     return render(request, 'mp3.html', {'music_attr': json.dumps(get_music_dict(music_attr)), 'lyric': lyric})
 
@@ -485,7 +493,8 @@ def find_songs_from_singer(request):
         music_list.append(get_music_dict(music))
     page = request.GET.get('page', 1)
     contacts = paging(music_list, 20, page)
-    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer': singer, 'len': len(music_list)})
+    return render(request, 'find_songs_from_singer.html',
+                  {'all_music': contacts, 'singer': singer, 'len': len(music_list)})
 
 
 def search_mus(request):
@@ -499,7 +508,8 @@ def search_mus(request):
         music_list = []
     page = request.GET.get('page', 1)
     contacts = paging(music_list, 20, page)
-    return render(request, 'find_songs_from_singer.html', {'all_music': contacts, 'singer': search_content, 'len': len(music_list) if len(music_list) else 0})
+    return render(request, 'find_songs_from_singer.html',
+                  {'all_music': contacts, 'singer': search_content, 'len': len(music_list) if len(music_list) else 0})
 
 
 def paging(afferent_list, num, page):
@@ -526,7 +536,8 @@ def search_video(request):
         video_list = []
     page = request.GET.get('page', 1)
     contacts = paging(video_list, 20, page)
-    return render(request, 'find_video_from_title.html', {'all_video': contacts, 'video': search_content, 'len': len(video_list)})
+    return render(request, 'find_video_from_title.html',
+                  {'all_video': contacts, 'video': search_content, 'len': len(video_list)})
 
 
 def search_say(request):
@@ -537,7 +548,8 @@ def search_say(request):
         say_list.append(get_says_dict(say))
     page = request.GET.get('page', 1)
     contacts = paging(say_list, 20, page)
-    return render(request, 'find_says_from_content.html', {'all_saying': contacts, 'say': search_content,'len': len(say_list)})
+    return render(request, 'find_says_from_content.html',
+                  {'all_saying': contacts, 'say': search_content, 'len': len(say_list)})
 
 
 def get_video_com_dict(comment):
@@ -553,7 +565,8 @@ def get_video_com_dict(comment):
 
 def get_video_comments(video_name='', page=1, size=5):
     result = []
-    for comment in CommentVideo.objects.filter(video__video_title=video_name, father__isnull=True)[(page - 1) * size:page * size]:
+    for comment in CommentVideo.objects.filter(video__video_title=video_name, father__isnull=True).order_by(
+            '-comment_time')[(page - 1) * size:page * size]:
         father_dict = get_video_com_dict(comment)
         father_dict['children'] = []
         for child_com in CommentVideo.objects.filter(ancestor=comment).order_by('comment_time'):
