@@ -46,7 +46,7 @@
                 {% endfor %}
             </div>
                 <div >
-                    <ul class="pagination">
+                    <ul class="pagination" style="margin-left: 15px">
                        <li class="pure-menu-item"><a href="?page=1" class="pure-menu-link">首页</a></li>
                        {% if news.has_previous %}
                            <li class="pure-menu-item"><a href="?page={{ news.previous_page_number }}" class="pure-menu-link">&laquo上一页</a></li>
@@ -66,7 +66,7 @@
     var search_content = "{{ search_content }}"
     $(document).ready(function () {
         if(news_len==0){
-            $('#find_content').attr('placeholder', search_content)
+            $('#find_content').val(search_content)
         }
         if(news_len==-1){
             $('#find_content').attr('placeholder', "请输入要查询的新闻关键字")
@@ -76,7 +76,7 @@
             var replace_ = `<div style="color: red">`+search_content +`</div>`
             var new_re = news_str.replace(search_content, replace_)
             $('#'+i).html(new_re)
-            $('#find_content').attr('placeholder', search_content)
+            $('#find_content').val(search_content)
         }
     })
 </script>

@@ -2,3 +2,6 @@
 {% block video %}
     <p style="color: #449d44">为你找到所有包含<span style="color: red">{{ video }}</span>的视频如下:</p>
 {% endblock %}
+{% block sort %}
+    排序：<a href="/search_video/1/?search_content={{ video }}">视频大小↑&nbsp;</a> <a href="/search_video/2/?search_content={{ video }}">视频大小↓&nbsp;</a><a href="/search_video/0/?search_content={{ video }}">上传时间↑&nbsp;</a> <a href="/search_video/3/?search_content={{ video }}">上传时间↓</a>
+{% endblock %}

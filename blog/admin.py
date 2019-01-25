@@ -90,7 +90,7 @@ class BlogAdmin(admin.ModelAdmin):
     list_display = ('video_title', 'upload_user', 'upload_time')
     list_per_page = 50
     ordering = ('-upload_time',)
-    list_filter = ('upload_user', 'upload_time')  # 过滤器
+    list_filter = ('upload_user', 'upload_time', 'video_size')  # 过滤器
     search_fields = ('video_title',)  # 搜索字段
 
 

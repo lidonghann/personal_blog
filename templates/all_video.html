@@ -16,6 +16,8 @@
 <script type="text/javascript" src="/static/plugin/jquery.page.js"></script>
 <script src="/static/js/common.js"></script>
 <script src="/static/js/heart.js"></script>
+
+
 <body>
 {% include "base.html" %}
 <div class="w_container">
@@ -28,17 +30,22 @@
 				</ol>
 			<div class="bloglist">
                 <div class="search d1">
-                    <form action="/search_video/" method="get">
+                    <form action="/search_video/0/" method="get">
                         <input name="search_content" type="text" placeholder="请输入视频名称" id="find_content">
                         <button type="submit" id="search_video"></button>
                     </form>
                 </div>
+                {% block sort %}
+                排序：<a href="/video/1/">视频大小↑&nbsp;</a><a href="/video/2/">视频大小↓&nbsp;</a><a href="/video/0/">上传时间↑&nbsp;</a> <a href="/video/3/">上传时间↓</a>
+                {% endblock %}
                 {% block video %}
                 {% endblock %}
 				{% for video in all_video %}
 			    <ul class="arrow_box">
 			     <div class="sy">
                      <a href="/video_detailed/?video_name={{ video.video_title }}" target="_blank"><div id="{{ forloop.counter}}" style="display: flex;justify-content: space-between;align-items: center; position:relative;">{{ video.video_title }}</div></a>
+                     <div style="position:absolute; left: 500px"><span>大小：{{ video.video_size }}</span></div>
+                     <div style="position:absolute; left: 700px"><a href="/media/{{ video.video_path }}" download="/media/{{ video.video_path }}">下载</a></div>
                      <div style="text-align: right"><span>上传者：{{ video.upload_user }}</span></div>
 			     </div>
 		      	<!--<p class="bloglist_count"><span class="count"><i class="glyphicon glyphicon-user"></i><a href="#">admin</a></span> <span class="count"><i class="glyphicon glyphicon-eye-open"></i>阅读:22</span><span class="count"><i class="glyphicon glyphicon-comment"></i>评论:0</span></p>-->
@@ -47,7 +54,7 @@
                 {% endfor %}
             </div>
                 <div >
-                    <ul class="pagination">
+                    <ul class="pagination" style="margin-left: 15px">
                        <li class="pure-menu-item"><a href="?page=1" class="pure-menu-link">首页</a></li>
                        {% if all_video.has_previous %}
                            <li class="pure-menu-item"><a href="?page={{ all_video.previous_page_number }}" class="pure-menu-link">&laquo上一页</a></li>
@@ -78,18 +85,18 @@
     var search_content = "{{ video }}"
     $(document).ready(function () {
         if(news_len==0){
-            $('#find_content').attr('placeholder', search_content)
-        }
+            $('#find_content').val(search_content)}
         if(news_len==-1){
-            $('#find_content').attr('placeholder', "请输入视频名称")
+            $('#find_content').val(search_content)
         }
         for(var i=1; i<=news_len; i++){
             var news_str = $('#'+i).html()
             var replace_ = `<div style="color: red">`+search_content +`</div>`
             var new_re = news_str.replace(search_content, replace_)
             $('#'+i).html(new_re)
-            $('#find_content').attr('placeholder', search_content)
+            $('#find_content').val(search_content)
         }
     })
+
 </script>
 </html>
