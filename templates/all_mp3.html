@@ -41,6 +41,8 @@
 			     <div class="sy">
                      <a href="/music/?music_name={{ music.music_title }}" target="_blank"><div id="{{ forloop.counter}}" style="display: flex;justify-content: space-between;align-items: center; position:relative;">{{ music.music_title }}</div></a>
                      <div style="position:absolute; left: 300px"><a target="_blank" href="/music_singer/?singer={{ music.singer }}">歌手：{{ music.singer }}</a></div>
+                     <div style="position:absolute; left: 600px"><a href="/media/{{ music.music_path }}" download="/media/{{ music.music_path }}">下载歌曲</a></div>
+                     <div style="position:absolute; left: 700px"><a href="/media/{{ music.lyric_path }}" download="/media/{{ music.lyric_path }}">下载歌词</a></div>
                      <div style="text-align: right"><span>上传者：{{ music.upload_user }}</span></div>
 			     </div>
 		      	<!--<p class="bloglist_count"><span class="count"><i class="glyphicon glyphicon-user"></i><a href="#">admin</a></span> <span class="count"><i class="glyphicon glyphicon-eye-open"></i>阅读:22</span><span class="count"><i class="glyphicon glyphicon-comment"></i>评论:0</span></p>-->
@@ -49,7 +51,7 @@
                 {% endfor %}
             </div>
                 <div >
-                    <ul class="pagination">
+                    <ul class="pagination" style="margin-left: 15px">
                        <li class="pure-menu-item"><a href="?page=1" class="pure-menu-link">首页</a></li>
                        {% if all_music.has_previous %}
                            <li class="pure-menu-item"><a href="?page={{ all_music.previous_page_number }}" class="pure-menu-link">&laquo上一页</a></li>
@@ -80,7 +82,7 @@
     var search_content = "{{ singer }}"
     $(document).ready(function () {
         if(news_len==0){
-            $('#find_content').attr('placeholder', search_content)
+            $('#find_content').val(search_content)
         }
         if(news_len==-1){
             $('#find_content').attr('placeholder', "请输入歌曲名称，歌手...")
@@ -90,7 +92,7 @@
             var replace_ = `<div style="color: red">`+search_content +`</div>`
             var new_re = news_str.replace(search_content, replace_)
             $('#'+i).html(new_re)
-            $('#find_content').attr('placeholder', search_content)
+            $('#find_content').val(search_content)
         }
     })
 </script>

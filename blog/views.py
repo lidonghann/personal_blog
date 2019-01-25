@@ -16,7 +16,7 @@ from bs4 import BeautifulSoup
 from django.db.models import Q
 from dwebsocket.decorators import accept_websocket
 import time
-from util import redisConnect
+from util import RedisConnect, VideoFileCheck
 import urllib
 import os
 
@@ -394,7 +394,7 @@ def search_news(request):
                     else:
                         data = []
     page = request.GET.get('page', 1)
-    contacts = paging(data, 30, page)
+    contacts = paging(data, 20, page)
 
     return render(request, 'find_news_from_title.html',
                   {'news': contacts, 'search_content': search_content, 'len': len(data)})
@@ -415,15 +415,30 @@ def news_spider(request):
                 if new:
                     data.append(new)
     page = request.GET.get('page', 1)
-    contacts = paging(data, 30, page)
+    contacts = paging(data, 20, page)
     return render(request, 'news.html', {'news': contacts, 'len': -1})
 
 
-def video(request):
+def video(request, sort_type):
     video_list = []
-    all_video = Video.objects.all().order_by('-upload_time')
-    for a_video in all_video:
-        video_list.append(get_video_dict(a_video))
+    if int(sort_type) == 0:
+        all_video = Video.objects.all().order_by('-upload_time')
+        for a_video in all_video:
+            a_video.video_size = get_video_dict(a_video, is_convert=False)['video_size']
+            a_video.save()
+            video_list.append(get_video_dict(a_video))
+    elif int(sort_type) == 1:
+        all_video = Video.objects.all().order_by('video_size')
+        for a_video in all_video:
+            video_list.append(get_video_dict(a_video))
+    elif int(sort_type) == 2:
+        all_video = Video.objects.all().order_by('-video_size')
+        for a_video in all_video:
+            video_list.append(get_video_dict(a_video))
+    elif int(sort_type) == 3:
+        all_video = Video.objects.all().order_by('upload_time')
+        for a_video in all_video:
+            video_list.append(get_video_dict(a_video))
     page = request.GET.get('page', 1)
     contacts = paging(video_list, 20, page)
     return render(request, 'all_video.html', {'all_video': contacts, 'len': -1})
@@ -446,8 +461,14 @@ def video_detailed(request):
         return render(request, 'video_demo.html', {'video_dict': json.dumps(get_video_dict(video_attr))})
 
 
-def get_video_dict(video_attr):
+def get_video_dict(video_attr, is_convert=True):
     video_dict = {}
+    video_size = VideoFileCheck('media/')
+    if not is_convert:
+        size = video_size.get_file_size(str(video_attr.video_path), is_convert=False)
+    else:
+        size = video_size.get_file_size(str(video_attr.video_path))
+    video_dict['video_size'] = size
     video_dict['video_title'] = video_attr.video_title
     video_dict['upload_time'] = str(video_attr.upload_time).split('+')[0][0:10]
     video_dict['video_path'] = str(video_attr.video_path)
@@ -525,11 +546,18 @@ def paging(afferent_list, num, page):
     return contacts
 
 
-def search_video(request):
+def search_video(request, sort_type):
     video_list = []
     search_content = request.GET.get('search_content', '')
     if search_content:
-        videos = Video.objects.filter(Q(video_title__icontains=search_content))
+        if int(sort_type) == 0:
+            videos = Video.objects.filter(Q(video_title__icontains=search_content)).order_by('-upload_time')
+        elif int(sort_type) == 1:
+            videos = Video.objects.filter(Q(video_title__icontains=search_content)).order_by('video_size')
+        elif int(sort_type) == 2:
+            videos = Video.objects.filter(Q(video_title__icontains=search_content)).order_by('-video_size')
+        elif int(sort_type) == 3:
+            videos = Video.objects.filter(Q(video_title__icontains=search_content)).order_by('upload_time')
         for video in videos:
             video_list.append(get_video_dict(video))
     else:

@@ -63,6 +63,7 @@ class Video(models.Model):
     upload_user = models.ForeignKey(User)
     upload_time = models.DateTimeField(auto_now_add=True)
     video_title = models.CharField(max_length=50)
+    video_size = models.IntegerField(default=0, editable=False, blank=True)
 
 
 class Music(models.Model):
