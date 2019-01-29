@@ -23,7 +23,8 @@ import os
 reload(sys)
 sys.setdefaultencoding('utf-8')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}
 
 @csrf_exempt
 def login(request):
@@ -272,6 +273,7 @@ def tag(request):
 def personal_center(request):
     resp = {'success': 0, 'error': ''}
     username = request.session.get('username', '')
+    city = get_position(request)
     if request.method == 'POST':
         initial_pw = request.POST.get('initial_pw', '')
         new_pw = request.POST.get('new_pw', '')
@@ -289,7 +291,7 @@ def personal_center(request):
                 resp['success'] = 1
         return HttpResponse(json.dumps(resp))
     else:
-        return render(request, 'personal_center.html', {'username': username})
+        return render(request, 'personal_center.html', {'username': username, 'city': city})
 
 
 @csrf_exempt
@@ -363,8 +365,6 @@ def get_msg_dict(msg):
 
 
 def connect():
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}
     url = 'https://news.sina.com.cn/china/'
     res = requests.get(url)
     # 使用UTF-8编码
@@ -627,3 +627,80 @@ def video_comment(request):
         else:
             resp['error'] = '请先登录后再评论'
         return HttpResponse(json.dumps(resp))
+
+
+def wangyi_head():
+    url = 'http://c.m.163.com/nc/article/headline/T1348647853363/0-100.html'
+    res = requests.get(url, headers=headers).text
+    data = json.loads(res)
+    return data
+
+
+def wangyi_news(request, sort_type):
+    news = wangyi_head()['T1348647853363']
+    sort_news = []
+    if int(sort_type) == 1:
+        sort_news = sorted(news, key=lambda x: x['replyCount'])
+    elif int(sort_type) == 2:
+        sort_news = sorted(news, key=lambda x: x['replyCount'], reverse=True)
+    elif int(sort_type) == 0:
+        sort_news = sorted(news, key=lambda x: x['ptime'], reverse=True)
+    elif int(sort_type) == 3:
+        sort_news = sorted(news, key=lambda x: x['ptime'])
+    page = request.GET.get('page', 1)
+    contacts = paging(sort_news, 10, page)
+    return render(request, 'wangyi_news.html', {'news': contacts, 'len': -1})
+
+
+def search_wangyi_news(request, sort_type):
+    search_content = request.GET.get('search_content', '')
+    news = wangyi_head()['T1348647853363']
+    data = []
+    for new in news:
+        new_dict = {}
+        if search_content in new['title']:
+            new_dict['title'] = new['title']
+            new_dict['url_3w'] = new['url_3w'] if new['url_3w'] else "null"
+            new_dict['ptime'] = new['ptime']
+            new_dict['imgsrc'] = new['imgsrc']
+            new_dict['replyCount'] = new['replyCount']
+            data.append(new_dict)
+    sort_news = []
+    if int(sort_type) == 1:
+        sort_news = sorted(data, key=lambda x: x['replyCount'])
+    elif int(sort_type) == 2:
+        sort_news = sorted(data, key=lambda x: x['replyCount'], reverse=True)
+    elif int(sort_type) == 0:
+        sort_news = sorted(data, key=lambda x: x['ptime'], reverse=True)
+    elif int(sort_type) == 3:
+        sort_news = sorted(data, key=lambda x: x['ptime'])
+    page = request.GET.get('page', 1)
+    contacts = paging(sort_news, 10, page)
+    return render(request, 'find_wangyi_news_from_title.html', {'news': contacts, 'search_content': search_content, 'len': len(sort_news)})
+
+
+def get_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    if ip == '' or ip is None:
+        ip = request.META.get('HTTP_CLIENT_IP')
+    if ip == "" or ip is None:
+        ip = "X.X.X.X"
+    return ip
+
+
+def get_position(request):
+    ip = get_ip(request)
+    # url = "http://ip.taobao.com/service/getIpInfo.php?ip=203.100.83.38"
+    url = "http://ip.taobao.com/service/getIpInfo.php?ip={}".format(ip)
+    res = requests.get(url, headers=headers).text
+    city = json.loads(res)['data']['city']
+    return city
+
+
+def weather_forecast(request):
+    return render(request, 'weather_forecast.html')
+

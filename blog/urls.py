@@ -48,5 +48,7 @@ urlpatterns = [
     url(r'^search_news/', views.search_news),
     url(r'^video_com/', views.video_comment),
     url(r'^children_com/', views.video_comment),
-
+    url(r'^wangyi_news/(.+)/$', views.wangyi_news),
+    url(r'^search_wangyi_news/(.+)/$', views.search_wangyi_news),
+    url(r'^weather_forecast/', views.weather_forecast),
 ]

@@ -1,0 +1,7 @@
+{% extends 'wangyi_news.html' %}
+{% block news %}
+    <p style="color: #449d44">为你找到所有包含<span style="color: red">{{ search_content }}</span>的新闻如下:</p>
+{% endblock %}
+{% block sort %}
+排序：<a href="/search_wangyi_news/0/?search_content={{ search_content }}">发布时间↑&nbsp;</a><a href="/search_wangyi_news/3/?search_content={{ search_content }}">发布时间↓&nbsp;</a><a href="/search_wangyi_news/2/?search_content={{ search_content }}">跟帖数量↑&nbsp;</a> <a href="/search_wangyi_news/1/?search_content={{ search_content }}">跟帖数量↓</a>
+{% endblock %}
