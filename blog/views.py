@@ -273,6 +273,7 @@ def tag(request):
 def personal_center(request):
     resp = {'success': 0, 'error': ''}
     username = request.session.get('username', '')
+    city = get_position(request)
     if request.method == 'POST':
         initial_pw = request.POST.get('initial_pw', '')
         new_pw = request.POST.get('new_pw', '')
@@ -290,7 +291,7 @@ def personal_center(request):
                 resp['success'] = 1
         return HttpResponse(json.dumps(resp))
     else:
-        return render(request, 'personal_center.html', {'username': username})
+        return render(request, 'personal_center.html', {'username': username, 'city': city})
 
 
 @csrf_exempt
@@ -697,5 +698,9 @@ def get_position(request):
     url = "http://ip.taobao.com/service/getIpInfo.php?ip={}".format(ip)
     res = requests.get(url, headers=headers).text
     city = json.loads(res)['data']['city']
-    return HttpResponse(city)
+    return city
+
+
+def weather_forecast(request):
+    return render(request, 'weather_forecast.html')
 
