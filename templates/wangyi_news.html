@@ -26,23 +26,31 @@
 				<ol class="breadcrumb w_breadcrumb">
 				  <li><a href="/index/">首页</a></li>
 				  <li class="active">新闻</li>
-				  <span class="w_navbar_tip">一个人自以为刻骨铭心的回忆。别人也许早已经忘记了</span>
+				  <span class="w_navbar_tip">未知来生相见否？陌上逢却在少年。</span>
 				</ol>
 			<div class="bloglist">
                 <div class="search d2">
-                    <form action="/search_news/" method="get">
+                    <form action="/search_wangyi_news/0/" method="get">
                         <input name="search_content" type="text" placeholder="请输入要查询的新闻关键字" id="find_content">
                         <button type="submit" id="search_video"></button>
                     </form>
                 </div>
+                {% block sort %}
+                排序：<a href="/wangyi_news/0/">发布时间↑&nbsp;</a><a href="/wangyi_news/3/">发布时间↓&nbsp;</a><a href="/wangyi_news/2/">跟帖数量↑&nbsp;</a> <a href="/wangyi_news/1">跟帖数量↓</a>
+                {% endblock %}
                 {% block news %}
                 {% endblock %}
 				{% for new in news %}
+                    {% if new.url_3w %}
 			    <ul class="arrow_box">
 			     <div class="sy">
-                     <a href="{{ new.content}}"  target="_blank"><div id="{{ forloop.counter}}" style="display: flex;justify-content: space-between;align-items: center; position:relative;">{{ new.title }}</div></a>
+                     <img src="{{ new.imgsrc }}">
+                     <a href="{{ new.url_3w}}"  target="_blank"><div style="position:absolute; left: 400px; display: flex;justify-content: space-between;align-items: center;" id="{{ forloop.counter}}" >{{ new.title }}</div></a>
+                     <div style="position: absolute; left: 750px; bottom: 40px">跟帖：{{ new.replyCount }}</div>
 			     </div>
+                <span class="dateview">{{ new.ptime }}</span>
 			    </ul>
+                    {% endif %}
                 {% endfor %}
             </div>
                 <div >
@@ -73,7 +81,7 @@
         }
         for(var i=1; i<=news_len; i++){
             var news_str = $('#'+i).html()
-            var replace_ = `<span style="color: red">`+search_content +`</span>`
+            var replace_ = `<div style="color: red">`+search_content +`</div>`
             var new_re = news_str.replace(search_content, replace_)
             $('#'+i).html(new_re)
             $('#find_content').val(search_content)

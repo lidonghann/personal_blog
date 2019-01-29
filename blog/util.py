@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import redis
-from moviepy.editor import VideoFileClip
 import os
 import sys
 # reload(sys)
