@@ -50,7 +50,7 @@ def login(request):
         return HttpResponse(json.dumps(resp))
     else:
         code_str = generate_code()
-        url = 'static/img/ve_code/' + code_str + '.png'
+        url = 'media/ve_code/' + code_str + '.png'
         return render(request, 'login.html', {'ve': url})
 
 
@@ -754,10 +754,10 @@ def generate_code():
         code_str += tmp
     # 模糊处理
     image = image.filter(ImageFilter.BLUR)
-    ls = os.listdir('static/img/ve_code/')
+    ls = os.listdir('media/ve_code/')
     for i in ls:
-        os.remove(os.path.join('static/img/ve_code/', i))
-    image.save('static/img/ve_code/' + code_str + '.png', 'png')
+        os.remove(os.path.join('media/ve_code/', i))
+    image.save('media/ve_code/' + code_str + '.png', 'png')
     with RedisConnect() as r:
         r.set('code', code_str)
     return code_str
@@ -767,7 +767,7 @@ def generate_code():
 def refresh(request):
     resp = {'success': 0, 'error': '', 'data': []}
     code_str = generate_code()
-    url = 'static/img/ve_code/' + code_str + '.png'
+    url = 'media/ve_code/' + code_str + '.png'
     resp['data'].append(url)
     resp['success'] = 1
     return HttpResponse(json.dumps(resp))
