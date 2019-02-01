@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.contrib import auth
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.http import HttpResponse
@@ -14,11 +14,12 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from django.db.models import Q
-from dwebsocket.decorators import accept_websocket
 import time
 from util import RedisConnect, VideoFileCheck
 import urllib
 import os
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+import random
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -32,16 +33,25 @@ def login(request):
     if request.method == 'POST':
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
-        result = auth.authenticate(username=username, password=password)
-        if result is not None:
-            auth.login(request, result)
-            request.session['username'] = str(result)
-            resp['success'] = 1
+        v_code = request.POST.get('verification_code', '')
+        new_code = v_code.upper()
+        with RedisConnect() as r:
+            code_str = r.get('code')
+        if new_code == code_str:
+            result = auth.authenticate(username=username, password=password)
+            if result is not None:
+                auth.login(request, result)
+                request.session['username'] = str(result)
+                resp['success'] = 1
+            else:
+                resp['error'] = '用户名或密码错误'
         else:
-            resp['error'] = '用户名或密码错误'
+            resp['error'] = '验证码错误'
         return HttpResponse(json.dumps(resp))
     else:
-        return render(request, 'login.html')
+        code_str = generate_code()
+        url = 'static/img/ve_code/' + code_str + '.png'
+        return render(request, 'login.html', {'ve': url})
 
 
 def logout(request):
@@ -704,3 +714,60 @@ def get_position(request):
 def weather_forecast(request):
     return render(request, 'weather_forecast.html')
 
+
+def calendar(request):
+    return render(request, 'calendar.html')
+
+
+# 随机字母:
+def rnd_char():
+    return chr(random.randint(65, 90))
+
+
+# 随机颜色:
+def rnd_color():
+    return random.randint(0, 245), random.randint(0, 245), random.randint(0, 245)
+
+
+# 生成验证码和图片
+def generate_code():
+    # 240 x 60:
+    width = 60 * 4
+    height = 60
+    image = Image.new('RGB', (width, height), (255, 255, 255))
+    # 创建Font对象
+    font = ImageFont.truetype('arial.ttf', 36)
+    # 创建Draw对象
+    draw = ImageDraw.Draw(image)
+    # 随机生成两条直线（一条贯穿上半部，一条贯穿下半部）
+    draw.line((0, 0 + random.randint(0, height // 2),
+               width, 0 + random.randint(0, height // 2)),
+              fill=rnd_color())
+    draw.line((0, height - random.randint(0, height // 2),
+               width, height - random.randint(0, height // 2)),
+              fill=rnd_color())
+    # 输出文字
+    code_str = ''
+    for t in range(4):
+        tmp = rnd_char()
+        draw.text((60 * t + 10, 10), tmp, font=font, fill=rnd_color())
+        code_str += tmp
+    # 模糊处理
+    image = image.filter(ImageFilter.BLUR)
+    ls = os.listdir('static/img/ve_code/')
+    for i in ls:
+        os.remove(os.path.join('static/img/ve_code/', i))
+    image.save('static/img/ve_code/' + code_str + '.png', 'png')
+    with RedisConnect() as r:
+        r.set('code', code_str)
+    return code_str
+
+
+@csrf_exempt
+def refresh(request):
+    resp = {'success': 0, 'error': '', 'data': []}
+    code_str = generate_code()
+    url = 'static/img/ve_code/' + code_str + '.png'
+    resp['data'].append(url)
+    resp['success'] = 1
+    return HttpResponse(json.dumps(resp))

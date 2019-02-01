@@ -23,7 +23,7 @@
     </div>
 
 
-    <div class="web_qr_login" id="web_qr_login" style="display: block; height: 235px;">
+    <div class="web_qr_login" id="web_qr_login" style="display: block; height: calc(100% - 46px);">
 
         <!--登录-->
         <div class="web_login" id="web_login">
@@ -50,8 +50,13 @@
                                 <input type="password" id="p" name="password" class="inputstyle"/>
                             </div>
                         </div>
+                        <div style="display: flex;justify-content: space-between;align-items: center; position:relative;">
+                            <label>验证码：</label>
+                            <input type="text" size="8" id="verification_code">
+                            <img id="ve" style="width: 100px; height: 50px; cursor:pointer;" src="/{{ ve }}" alt="" onclick="img_click()"/>
+                        </div>
                         <div style="padding-left:70px;margin-top:10px;color: red"><span id="login_error"></span></div>
-                        <div style="padding-left:50px;margin-top:20px;">
+                        <div style="display: flex; justify-content: center; padding-top: 30px">
                             <button id="submit" type="button" style="width:150px;" class="button_blue">登录</button>
                         </div>
                     </form>
@@ -127,6 +132,14 @@
 <div class="jianyi">*推荐使用ie8或以上版本ie浏览器或Chrome内核浏览器访问本站</div>
 </body>
 <script>
+    function img_click(){
+        $.post('/refresh/','',function (resp) {
+            resp = JSON.parse(resp)
+            if(resp['success']){
+                $('#ve').attr('src','/'+resp['data'][0])
+            }
+        })
+    }
     $(document).ready(function () {
         $("#user").click(function () {
             $("#user").val("")
@@ -142,13 +155,15 @@
         $('#submit').click(function () {
             $.post('/login/', {
                 'username': $('#u').val(),
-                'password': $('#p').val()
+                'password': $('#p').val(),
+                'verification_code':$('#verification_code').val(),
             }, function (resp) {
                 resp = JSON.parse(resp);
                 if (resp['success']) {
                     window.location.href = '/index/'
                 } else {
                     $('#login_error').text(resp['error'])
+                    img_click()
                 }
             })
         })

@@ -8,7 +8,7 @@ import sys
 
 class RedisConnect():
 
-    def __init__(self, host='localhost', port=6379, db=0):
+    def __init__(self, host='127.0.0.1', port=6379, db=0):
         self.host = host
         self.port = port
         self.db = db

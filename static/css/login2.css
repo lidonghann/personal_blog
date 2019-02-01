@@ -29,6 +29,7 @@ input::-ms-clear {
 .login {
 	margin:0 auto;
 	width:370px;
+	height: 350px;
 	border:2px solid #eee;
 	border-bottom:none;
 	position:relative;
@@ -80,7 +81,7 @@ input::-ms-clear {
 
 .web_login {
 	width:370px;
-	position:relative;
+	position:absolute;
 }
 #web_login{_left:60px;*left:0;}
 .web_login .login_form {
@@ -163,7 +164,6 @@ input::-ms-clear {
 }
 .web_qr_login {
 	position:relative;
-	
 	overflow:hidden;
 }
 
@@ -220,7 +220,7 @@ width: 80px;_width: 75px;_font-size:12px;}
 	float:left;
 	height:41px;border-radius:4px;
 	background:#2795dc;border:none;cursor:pointer;
-	border-bottom:3px solid #0078b3;*border-bottom:none;
+	border-bottom:3px solid #0078b3;
 	color:#fff;
 	font-size:16px;padding:0 10px;*width:140px;
 	text-align:center;outline:none;font-family: "Microsoft Yahei",Arial, Helvetica, sans-serif;
@@ -233,7 +233,7 @@ input.button_blue:hover
 	text-decoration:none;
 }
 a.zcxy {text-decoration: underline;line-height:58px;margin-left:15px;color: #959ca8;}
-.web_login .login_form {margin-top:30px;}
+.web_login .login_form {margin-top:30px;margin-top: 10px}
 .web_login .uinArea {
 height: 60px;}
 .header .switch{left:70px;}

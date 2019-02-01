@@ -51,4 +51,6 @@ urlpatterns = [
     url(r'^wangyi_news/(.+)/$', views.wangyi_news),
     url(r'^search_wangyi_news/(.+)/$', views.search_wangyi_news),
     url(r'^weather_forecast/', views.weather_forecast),
+    url(r'^calendar/', views.calendar),
+    url(r'^refresh/', views.refresh),
 ]
