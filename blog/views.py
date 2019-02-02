@@ -173,7 +173,7 @@ def get_blog(blog):
     blog_att['blog_context'] = blog.blog_context
     blog_att['blog_time'] = str(blog.blog_time).split('+')[0]
     blog_att['author'] = blog.author.username
-    blog_att['comment_quantity'] = blog.comment_quantity
+    blog_att['comment_quantity'] = Comment.objects.filter(blog_id=blog.id).count()
     blog_att['reading_quantity'] = blog.reading_quantity
     blog_att['image'] = str(blog.image)
     blog_att['blog_label'] = [label.tag for label in blog.blog_label.all()]
@@ -233,7 +233,6 @@ def comment(request):
                 father = Comment.objects.filter(id=father_comment_id).first()
                 com.father = father
                 com.ancestor = father.ancestor if father.ancestor else father
-                blog.comment_quantity += 1
             com.save()
             blog.save()
             resp['success'] = 1
@@ -272,7 +271,7 @@ def tag(request):
         resp['success'] = 1
         for blog in all_blog:
             resp['data'].append(get_blog(blog))
-        resp['total'] = Blog.objects.all().count()
+        resp['total'] = Tags.objects.get(tag=tag_name).blog_set.all().count()
         return HttpResponse(json.dumps(resp), content_type='application/json')
     else:
         return render(request, 'tag_article.html', {'tag_name': tag_name})
@@ -316,7 +315,7 @@ def user_blog(request):
         resp['success'] = 1
         for blog in all_blog:
             resp['data'].append(get_blog(blog))
-        resp['total'] = Blog.objects.all().count()
+        resp['total'] = User.objects.get(username=author).blog_set.all().count()
         return HttpResponse(json.dumps(resp), content_type='application/json')
     else:
         return render(request, 'user_blog.html', {'author': author})
@@ -736,7 +735,7 @@ def generate_code():
     height = 60
     image = Image.new('RGB', (width, height), (255, 255, 255))
     # 创建Font对象
-    font = ImageFont.truetype('arial.ttf', 36)
+    font = ImageFont.truetype('arialbd.ttf', 36)
     # 创建Draw对象
     draw = ImageDraw.Draw(image)
     # 随机生成两条直线（一条贯穿上半部，一条贯穿下半部）
