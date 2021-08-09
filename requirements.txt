@@ -72,7 +72,7 @@ PyQRCode==1.2.1
 python-dateutil==2.6.1
 python-docx==0.8.7
 pytz==2017.2
-pywin32==224
+pywin32==301
 pywin32-ctypes==0.2.0
 pyzmq==17.1.2
 qrcode==6.0
